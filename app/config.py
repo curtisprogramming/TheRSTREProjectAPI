@@ -1,4 +1,5 @@
 from pydantic import BaseSettings
+from os import path
 #from dotenv import load_dotenv
 #load_dotenv()
 
@@ -11,5 +12,8 @@ class Settings(BaseSettings):
     secret_key: str
     algorithm: str
     access_token_expire_minutes: int
+
+    class Config:
+        env_file = "app/.env"
 
 settings = Settings()
