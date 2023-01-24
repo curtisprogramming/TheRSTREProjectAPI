@@ -32,15 +32,6 @@ class ResourceOut(ResourceBase):
     class Config:
         orm_mode = True
 
-#schema for creating a resource
-class ResourceCreate(BaseModel):
-    name: str
-    url: str
-    categories: list
-    call: bool
-    text: bool
-    online_chat: bool
-
 #schema for an exrcise
 class ExerciseBase(BaseModel):
     name: str

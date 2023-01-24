@@ -17,7 +17,7 @@ def get_resources(db: Session = Depends(database.get_db)):
     return resources
 
 @router.post("/", response_model=schemas.ResourceOut)
-def create_resource(resource: schemas.ResourceCreate, status_code=status.HTTP_201_CREATED, db: Session = Depends(database.get_db)):
+def create_resource(resource: schemas.ResourceBase, status_code=status.HTTP_201_CREATED, db: Session = Depends(database.get_db)):
 
     new_resource = models.Resource(**resource.dict())
     db.add(new_resource)
