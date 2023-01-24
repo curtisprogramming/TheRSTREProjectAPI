@@ -19,10 +19,14 @@ def get_users(db: Session = Depends(database.get_db)):
 #CREATE USER - creates a new user
 @router.post("/", response_model=schemas.UserOut)
 def create_user(user: schemas.UserBase, status_code=status.HTTP_201_CREATED, db: Session = Depends(database.get_db)):
-
+    
     #hash the password
     hashed_pwd = utils.hash(user.password)
     user.password = hashed_pwd
+
+    user_check = db.query(models.User).filter(models.User.email == user.email).first()
+    if user_check:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"User with email {user_check.email} already exists")
 
     new_user = models.User(**user.dict())
     db.add(new_user)

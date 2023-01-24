@@ -16,3 +16,31 @@ class UserOut(BaseModel):
     class Config:
         orm_mode = True
 
+#schema for a resource
+class ResourceBase(BaseModel):
+    name: str
+    url: str
+    categories: list
+    call: bool
+    text: bool
+    online_chat: bool
+
+#schema response for a resource
+class ResourceOut(ResourceBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+#schema for creating a resource
+class ResourceCreate(BaseModel):
+    name: str
+    url: str
+    categories: list
+    call: bool
+    text: bool
+    online_chat: bool
+    
+
+
+
