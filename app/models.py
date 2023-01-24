@@ -23,3 +23,8 @@ class Resource(Base):
     text = Column(Boolean, nullable=False)
     online_chat = Column(Boolean, nullable=False)
 
+class Exercise(Base):
+    __tablename__ = "exercises"
+    id = Column(Integer, primary_key=True, nullable=False)
+    name = Column(String, nullable=False)
+    description = Column(String, nullable=False)
