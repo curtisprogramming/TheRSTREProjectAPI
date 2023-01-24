@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from .database import Base
+from sqlalchemy.dialects.postgresql import ARRAY
 
 class User(Base):
     __tablename__ = "users"
@@ -11,3 +12,14 @@ class User(Base):
     password = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     phoneNumber = Column(String, nullable=True)
+
+class Resource(Base):
+    __tablename__ = "resources"
+    id = Column(Integer, primary_key=True, nullable=False)
+    name = Column(String, nullable=False)
+    url = Column(String, nullable=False)
+    categories = Column(ARRAY(String), nullable=False)
+    call = Column(Boolean, nullable=False)
+    text = Column(Boolean, nullable=False)
+    online_chat = Column(Boolean, nullable=False)
+
