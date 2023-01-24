@@ -40,6 +40,18 @@ class ResourceCreate(BaseModel):
     call: bool
     text: bool
     online_chat: bool
+
+#schema for an exrcise
+class ExerciseBase(BaseModel):
+    name: str
+    description: str
+
+#schema for exrcise response
+class ExerciseOut(ExerciseBase):
+    id: int
+
+    class Config:
+        orm_mode = True
     
 
 
