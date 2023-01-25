@@ -43,7 +43,16 @@ class ExerciseOut(ExerciseBase):
 
     class Config:
         orm_mode = True
-    
+
+#schema for prompt
+class PromptBase(BaseModel):
+    prompt: str
+
+class PromptOut(PromptBase):
+    id: int
+
+    class Config:
+        orm_mode = True    
 
 
 
