@@ -1,7 +1,9 @@
 from typing import Optional, List
 from fastapi import FastAPI, Response, status, HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
-from .. import schemas, models, database, utils, oauth2
+from ..models import schemas, sa_models
+from ..utilities import oauth2, utils
+from .. import database
 
 router = APIRouter(
     prefix="/prompts",
