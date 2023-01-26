@@ -34,3 +34,10 @@ class Prompt(Base):
     __tablename__ = "prompts"
     id = Column(Integer, primary_key=True, nullable=False)
     prompt = Column(String, nullable=False)
+
+class PromptElement(Base):
+    __tablename__ = "promptElements"
+    id = Column(Integer, primary_key=True, nullable=False)
+    prompt = Column(String, nullable=False)
+    response = Column(String, nullable=False)
+    
