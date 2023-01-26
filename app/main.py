@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 #posts, users, auth, vote
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import users, resources, exercises, prompts, login
+from .routers.element_routers import prompts
+from .routers.main_routers import exercises, login, resources, users
+
 
 app = FastAPI()
 
@@ -19,8 +21,8 @@ app.add_middleware(
 app.include_router(users.router)
 app.include_router(resources.router)
 app.include_router(exercises.router)
-app.include_router(prompts.router)
 app.include_router(login.router)
+app.include_router(prompts.router)
 
 @app.get("/")
 def root():

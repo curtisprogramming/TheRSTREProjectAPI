@@ -1,9 +1,9 @@
 from typing import Optional, List
 from fastapi import FastAPI, Response, status, HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
-from ..models import schemas, sa_models
-from ..utilities import oauth2, utils
-from .. import database
+from ...models import schemas, sa_models
+from ...utilities import oauth2, utils
+from ... import database
 
 router = APIRouter(
     prefix="/exercises",
@@ -13,7 +13,7 @@ router = APIRouter(
 @router.get("/", response_model=List[schemas.ExerciseOut])
 def get_exercises(db: Session = Depends(database.get_db)):
    
-    query = db.query(models.Exercise)
+    query = db.query(sa_models.Exercise)
     exercises = query.all()
 
     return exercises
@@ -24,7 +24,7 @@ def create_exercise(exercise: schemas.ExerciseBase, status_code=status.HTTP_201_
     if not current_user.admin:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
 
-    new_exercise = models.Exercise(**exercise.dict())
+    new_exercise = sa_models.Exercise(**exercise.dict())
     db.add(new_exercise)
     db.commit()
     db.refresh(new_exercise)
@@ -34,7 +34,7 @@ def create_exercise(exercise: schemas.ExerciseBase, status_code=status.HTTP_201_
 @router.get("/{id}", response_model=schemas.ExerciseOut)
 def get_exercise(id: int, db: Session = Depends(database.get_db)):
 
-    exercise = db.query(models.Exercise).filter(models.Exercise.id == id).first()
+    exercise = db.query(sa_models.Exercise).filter(sa_models.Exercise.id == id).first()
 
     if not exercise:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Exercise with id: {id} does not exist")
@@ -44,7 +44,7 @@ def get_exercise(id: int, db: Session = Depends(database.get_db)):
 @router.put("/{id}", response_model=schemas.ExerciseOut)
 def update_exercise(id: int, updated_exercise: schemas.ExerciseBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
-    exercise_query = db.query(models.Exercise).filter(models.Exercise.id == id)
+    exercise_query = db.query(sa_models.Exercise).filter(sa_models.Exercise.id == id)
     exercise = exercise_query.first()
 
     if not exercise:
@@ -61,7 +61,7 @@ def update_exercise(id: int, updated_exercise: schemas.ExerciseBase, db: Session
 @router.delete("/{id}")
 def delete_exercise(id: int, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
-    exercise_query = db.query(models.Exercise).filter(models.Exercise.id == id)
+    exercise_query = db.query(sa_models.Exercise).filter(sa_models.Exercise.id == id)
     exercise = exercise_query.first()
 
     if not exercise:

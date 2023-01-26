@@ -1,9 +1,9 @@
 from typing import Optional, List
 from fastapi import FastAPI, Response, status, HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
-from ..models import schemas, sa_models
-from ..utilities import oauth2, utils
-from .. import database
+from ...models import schemas, sa_models
+from ...utilities import oauth2, utils
+from ... import database
 
 router = APIRouter(
     prefix="/prompts",
@@ -13,7 +13,7 @@ router = APIRouter(
 @router.get("/", response_model=List[schemas.PromptOut])
 def get_prompts(db: Session = Depends(database.get_db)):
    
-    query = db.query(models.Prompt)
+    query = db.query(sa_models.Prompt)
     prompts = query.all()
 
     return prompts
@@ -24,7 +24,7 @@ def create_prompt(prompt: schemas.PromptBase, status_code=status.HTTP_201_CREATE
     if not current_user.admin:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
 
-    new_prompt = models.Prompt(**prompt.dict())
+    new_prompt = sa_models.Prompt(**prompt.dict())
     db.add(new_prompt)
     db.commit()
     db.refresh(new_prompt)
@@ -34,7 +34,7 @@ def create_prompt(prompt: schemas.PromptBase, status_code=status.HTTP_201_CREATE
 @router.get("/{id}", response_model=schemas.PromptOut)
 def get_prompt(id: int, db: Session = Depends(database.get_db)):
 
-    prompt = db.query(models.Prompt).filter(models.Prompt.id == id).first()
+    prompt = db.query(sa_models.Prompt).filter(sa_models.Prompt.id == id).first()
 
     if not prompt:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Prompt with id: {id} does not exist")
@@ -44,7 +44,7 @@ def get_prompt(id: int, db: Session = Depends(database.get_db)):
 @router.put("/{id}", response_model=schemas.PromptOut)
 def update_prompt(id: int, updated_prompt: schemas.PromptBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
-    prompt_query = db.query(models.Prompt).filter(models.Prompt.id == id)
+    prompt_query = db.query(sa_models.Prompt).filter(sa_models.Prompt.id == id)
     prompt = prompt_query.first()
 
     if not prompt:
@@ -61,7 +61,7 @@ def update_prompt(id: int, updated_prompt: schemas.PromptBase, db: Session = Dep
 @router.delete("/{id}")
 def delete_prompt(id: int, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
-    prompt_query = db.query(models.Prompt).filter(models.Prompt.id == id)
+    prompt_query = db.query(sa_models.Prompt).filter(sa_models.Prompt.id == id)
     prompt = prompt_query.first()
 
     if not prompt:
