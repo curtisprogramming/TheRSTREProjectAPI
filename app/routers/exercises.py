@@ -1,7 +1,7 @@
 from typing import Optional, List
 from fastapi import FastAPI, Response, status, HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
-from .. import schemas, models, database, utils
+from .. import schemas, models, database, utils, oauth2
 
 router = APIRouter(
     prefix="/exercises",
@@ -17,7 +17,10 @@ def get_exercises(db: Session = Depends(database.get_db)):
     return exercises
 
 @router.post("/", response_model=schemas.ExerciseOut)
-def create_exercise(exercise: schemas.ExerciseBase, status_code=status.HTTP_201_CREATED, db: Session = Depends(database.get_db)):
+def create_exercise(exercise: schemas.ExerciseBase, status_code=status.HTTP_201_CREATED, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+
+    if not current_user.admin:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
 
     new_exercise = models.Exercise(**exercise.dict())
     db.add(new_exercise)
@@ -37,13 +40,16 @@ def get_exercise(id: int, db: Session = Depends(database.get_db)):
     return exercise
 
 @router.put("/{id}", response_model=schemas.ExerciseOut)
-def update_exercise(id: int, updated_exercise: schemas.ExerciseBase, db: Session = Depends(database.get_db)):
+def update_exercise(id: int, updated_exercise: schemas.ExerciseBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     exercise_query = db.query(models.Exercise).filter(models.Exercise.id == id)
     exercise = exercise_query.first()
 
     if not exercise:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Exercise with id: {id} does not exist")
+
+    if not current_user.admin:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
 
     exercise_query.update(updated_exercise.dict(), synchronize_session=False)
     db.commit()
@@ -51,12 +57,16 @@ def update_exercise(id: int, updated_exercise: schemas.ExerciseBase, db: Session
     return exercise
 
 @router.delete("/{id}")
-def delete_exercise(id: int, db: Session = Depends(database.get_db)):
+def delete_exercise(id: int, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+
     exercise_query = db.query(models.Exercise).filter(models.Exercise.id == id)
     exercise = exercise_query.first()
 
     if not exercise:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Exercise with id: {id} does not exist")
+
+    if not current_user.admin:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
 
     exercise_query.delete(synchronize_session=False)
     db.commit()

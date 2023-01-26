@@ -6,15 +6,22 @@ from typing import Optional
 class UserBase(BaseModel):
     email: EmailStr
     password: str
+    phone_number: Optional[str]
 
 #schema response for a user
 class UserOut(BaseModel):
     id: int
     email: EmailStr
+    phone_number: Optional[str]
     created_at: datetime
 
     class Config:
         orm_mode = True
+
+#schema for updating a user
+class UserUpdate(BaseModel):
+    phone_number: Optional[str]
+    email: str
 
 #schema for a resource
 class ResourceBase(BaseModel):
@@ -52,7 +59,17 @@ class PromptOut(PromptBase):
     id: int
 
     class Config:
-        orm_mode = True    
+        orm_mode = True  
+
+#Schema for a token response 
+class token(BaseModel):
+    access_token: str
+    token_type: str
+
+#Schema for the token payload data
+class tokenData(BaseModel):
+    id: str
+    admin: bool
 
 
 
