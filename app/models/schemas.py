@@ -71,5 +71,18 @@ class tokenData(BaseModel):
     id: str
     admin: bool
 
+#schema for the prompt element
+class PromptElement(BaseModel):
+    prompt: str
+    response: str
+
+#schema for the element response
+class PromtElementOut(PromptElement):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
 
 
