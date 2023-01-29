@@ -33,6 +33,7 @@ class Exercise(Base):
 class JournalEntry(Base):
     __tablename__ = "journalEntries"
     id = Column(Integer, primary_key=True, nullable=False)
+    owner_id = Column(Integer, nullable=False)
     title = Column(String, nullable=True)
     type = Column(String, nullable=False)
     created_at = Column(String, nullable=False, server_default=text('now()'))
