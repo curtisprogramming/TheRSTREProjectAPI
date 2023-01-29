@@ -1,9 +1,6 @@
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
-
-from ..models import schemas
-
-from ..models import sa_models
+from ..models import schemas, sa_models
 from .. import database
 from fastapi import Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer
@@ -51,6 +48,6 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
     token = verify_access_token(token, credentials_exception)
 
-    user = db.query(models.User).filter(models.User.id == token.id).first()
+    user = db.query(sa_models.User).filter(sa_models.User.id == token.id).first()
 
     return user
