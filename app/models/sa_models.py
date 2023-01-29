@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from ..database import Base
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 
 class User(Base):
     __tablename__ = "users"
@@ -38,6 +38,7 @@ class JournalEntry(Base):
     type = Column(String, nullable=False)
     created_at = Column(String, nullable=False, server_default=text('now()'))
     tags = Column(ARRAY(String), nullable=True)
+    elements = Column(ARRAY(JSONB), nullable=True)
 
 class Prompt(Base):
     __tablename__ = "prompts"
