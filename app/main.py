@@ -2,7 +2,7 @@ from fastapi import FastAPI
 #posts, users, auth, vote
 from fastapi.middleware.cors import CORSMiddleware
 from .routers.element_routers import prompts
-from .routers.main_routers import exercises, login, resources, users
+from .routers.main_routers import exercises, login, resources, users, journalEntries
 
 
 app = FastAPI()
@@ -23,6 +23,7 @@ app.include_router(resources.router)
 app.include_router(exercises.router)
 app.include_router(login.router)
 app.include_router(prompts.router)
+app.include_router(journalEntries.router)
 
 @app.get("/")
 def root():

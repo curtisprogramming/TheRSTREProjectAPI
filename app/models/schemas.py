@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Dict
 
 #schema for a user
 class UserBase(BaseModel):
@@ -79,6 +79,22 @@ class PromptElement(BaseModel):
 #schema for the element response
 class PromtElementOut(PromptElement):
     id: int
+
+    class Config:
+        orm_mode = True
+
+#schema for journal entries
+class JournalEntry(BaseModel):
+    title: str
+    type: str
+    tags: Optional[list]
+    elements: Optional[List[Dict[str, str]]]
+
+#schema for journal entry response
+class JournalEntryOut(JournalEntry):
+    id: int
+    owner_id: int
+    created_at: datetime
 
     class Config:
         orm_mode = True
