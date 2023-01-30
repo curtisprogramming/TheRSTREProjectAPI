@@ -29,9 +29,9 @@ def create_user(user: schemas.UserBase, status_code=status.HTTP_201_CREATED, db:
     hashed_pwd = utils.hash(user.password)
     user.password = hashed_pwd
 
-    user_check = db.query(sa_models.User).filter(sa_models.User.email == user.email).first()
-    if user_check:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"User with email {user_check.email} already exists")
+    email_check = db.query(sa_models.User).filter(sa_models.User.email == user.email).first()
+    if email_check:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"User with email {email_check.email} already exists")
 
     new_user = sa_models.User(**user.dict())
     db.add(new_user)
@@ -50,8 +50,10 @@ def get_user(id: int, db: Session = Depends(database.get_db), current_user: int 
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id: {id} was not found")
 
-    if id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Unauthorized to access user with id: {id}")  
+    if current_user.admin or current_user.id == id:
+        pass
+    else:
+       raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Unauthorized to access user with id: {id}")  
 
     return user
 
@@ -64,13 +66,13 @@ def delete_user(id: int, db: Session = Depends(database.get_db), current_user: i
     user = user_query.first()
 
     if user == None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id: {id} was not found") 
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id: {id} was not found")  
 
-    if id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Unauthorized to access user with id: {id}")  
-
-    user_query.delete(synchronize_session=False)
-    db.commit()
+    if current_user.admin or current_user.id == id:
+        user_query.delete(synchronize_session=False)
+        db.commit()
+    else:
+       raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Unauthorized to access user with id: {id}") 
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -85,10 +87,14 @@ def update_user(id: int, updated_user: schemas.UserUpdate, db: Session = Depends
     if user == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id: {id} was not found")
 
-    if id != current_user.id:
-       raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Unauthorized to access user with id: {id}") 
+    email_check = db.query(sa_models.User).filter(sa_models.User.email == updated_user.email).first()
+    if email_check:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"Email: {updated_user.email} is already used on another account")
 
-    user_query.update(updated_user.dict(), synchronize_session=False)
-    db.commit()
+    if current_user.admin or current_user.id == id:
+        user_query.update(updated_user.dict(), synchronize_session=False)
+        db.commit()
+    else:
+       raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Unauthorized to access user with id: {id}") 
 
     return user
