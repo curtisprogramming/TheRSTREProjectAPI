@@ -46,6 +46,7 @@ class ResourceOut(ResourceBase):
 class ExerciseBase(BaseModel):
     name: str
     description: str
+    image_name: str
 
 #schema for exrcise response
 class ExerciseOut(ExerciseBase):
