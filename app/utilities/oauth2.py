@@ -50,4 +50,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
     user = db.query(sa_models.User).filter(sa_models.User.id == token.id).first()
 
+    if user == None:
+        raise credentials_exception
+
     return user
