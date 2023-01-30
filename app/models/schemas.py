@@ -5,6 +5,7 @@ from typing import Optional, List, Dict
 #schema for a user
 class UserBase(BaseModel):
     email: EmailStr
+    username: str
     password: str
     phone_number: Optional[str]
 
@@ -12,6 +13,7 @@ class UserBase(BaseModel):
 class UserOut(BaseModel):
     id: int
     email: EmailStr
+    username: str
     phone_number: Optional[str]
     created_at: datetime
 
@@ -21,6 +23,7 @@ class UserOut(BaseModel):
 #schema for updating a user
 class UserUpdate(BaseModel):
     phone_number: Optional[str]
+    username: str
     email: str
 
 #schema for a resource
