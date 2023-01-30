@@ -30,7 +30,7 @@ class UserUpdate(BaseModel):
 class ResourceBase(BaseModel):
     name: str
     url: str
-    categories: list
+    categories: List
     call: bool
     text: bool
     online_chat: bool

@@ -24,12 +24,13 @@ def create_resource(resource: schemas.ResourceBase, status_code=status.HTTP_201_
     if not current_user.admin:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
 
+
     new_resource = sa_models.Resource(**resource.dict())
     db.add(new_resource)
     db.commit()
     db.refresh(new_resource)
 
-    return new_resource
+    return resource
 
 @router.get("/{id}", response_model=schemas.ResourceOut)
 def get_resource(id: int, db: Session = Depends(database.get_db)):
