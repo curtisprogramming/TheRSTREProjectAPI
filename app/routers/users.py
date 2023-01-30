@@ -1,6 +1,7 @@
 from typing import Optional, List
 from fastapi import FastAPI, Response, status, HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from ..models import schemas, sa_models
 from ..utilities import oauth2, utils
 from .. import database
@@ -29,14 +30,22 @@ def create_user(user: schemas.UserBase, status_code=status.HTTP_201_CREATED, db:
     hashed_pwd = utils.hash(user.password)
     user.password = hashed_pwd
 
-    email_check = db.query(sa_models.User).filter(sa_models.User.email == user.email).first()
-    if email_check:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"User with email {email_check.email} already exists")
+    try:
+        new_user = sa_models.User(**user.dict())
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        
+    except IntegrityError as err:
+        err_msg = err.args[0]
+        if "duplicate key value violates unique constraint \"users_email_key\"" in err_msg:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"User with email: {user.email} already exists")
 
-    new_user = sa_models.User(**user.dict())
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+        elif "duplicate key value violates unique constraint \"users_username_key\"" in err_msg:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"User with username: {user.username} already exists")
+
+        else:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=err_msg)
 
     return new_user
 
@@ -87,14 +96,23 @@ def update_user(id: int, updated_user: schemas.UserUpdate, db: Session = Depends
     if user == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id: {id} was not found")
 
-    email_check = db.query(sa_models.User).filter(sa_models.User.email == updated_user.email).first()
-    if email_check:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"Email: {updated_user.email} is already used on another account")
-
     if current_user.admin or current_user.id == id:
-        user_query.update(updated_user.dict(), synchronize_session=False)
-        db.commit()
-    else:
+
+        try:
+            user_query.update(updated_user.dict(), synchronize_session=False)
+            db.commit()
+        except IntegrityError as err:
+            err_msg = err.args[0]
+            if "duplicate key value violates unique constraint \"users_email_key\"" in err_msg:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"User with email: {updated_user.email} already exists")
+
+            elif "duplicate key value violates unique constraint \"users_username_key\"" in err_msg:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"User with username: {updated_user.username} already exists")
+
+            else:
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=err_msg)
+
+    elif "duplicate key value violates unique constraint \"users_username_key\"" in err_msg:
        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Unauthorized to access user with id: {id}") 
 
     return user
