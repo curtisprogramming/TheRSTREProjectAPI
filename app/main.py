@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 #posts, users, auth, vote
 from fastapi.middleware.cors import CORSMiddleware
-from .routers.element_routers import prompts
-from .routers.main_routers import exercises, login, resources, users, journalEntries
+from .routers import prompts, exercises, login, resources, users, journalEntries
 
 
 app = FastAPI()
