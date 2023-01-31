@@ -18,18 +18,22 @@ def get_prompts(db: Session = Depends(database.get_db)):
 
     return prompts
 
-@router.post("/", response_model=schemas.PromptOut)
-def create_prompt(prompt: schemas.PromptBase, status_code=status.HTTP_201_CREATED, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+@router.post("/", response_model=List[schemas.PromptOut])
+def create_prompt(prompts: List[schemas.PromptBase], status_code=status.HTTP_201_CREATED, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     if not current_user.admin:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
 
-    new_prompt = sa_models.Prompt(**prompt.dict())
-    db.add(new_prompt)
-    db.commit()
-    db.refresh(new_prompt)
+    updated_prompts = []
 
-    return new_prompt
+    for prompt in prompts:
+        new_prompt = sa_models.Prompt(**prompt.dict())
+        updated_prompts.append(new_prompt)
+        db.add(new_prompt)
+        db.commit()
+        db.refresh(new_prompt)
+
+    return updated_prompts
 
 @router.get("/{id}", response_model=schemas.PromptOut)
 def get_prompt(id: int, db: Session = Depends(database.get_db)):
