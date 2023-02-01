@@ -10,7 +10,7 @@ router = APIRouter(
     tags=["Completed Exercises"]
 )
 
-@router.get("/")#, response_model=List[schemas.CompletedExercisesOut])
+@router.get("/", response_model=schemas.CompletedExercisesOut)
 def get_exercises(db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
    
     query = db.query(sa_models.User.completed_exercises).filter(sa_models.User.id == current_user.id)
@@ -25,9 +25,9 @@ def update_exercise(updated_exercises: schemas.CompletedExercises, db: Session =
     user = user_query.first()
     user.completed_exercises = updated_exercises.dict()
 
-    updated_user = schemas.UserBase(**utils.row_to_dict(user))
+    updated_user = utils.row_to_dict(user)
     user_query.update(updated_user, synchronize_session=False)
 
     db.commit()
 
-    return updated_user.completed_exercises
+    return updated_user["completed_exercises"]
