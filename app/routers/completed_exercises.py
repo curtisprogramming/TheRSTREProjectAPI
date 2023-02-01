@@ -14,9 +14,9 @@ router = APIRouter(
 def get_exercises(db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
    
     query = db.query(sa_models.User.completed_exercises).filter(sa_models.User.id == current_user.id)
-    completed_exercises = query.first()
+    completed_exercises_col = query.first()
 
-    return completed_exercises
+    return completed_exercises_col.completed_exercises
 
 @router.put("/", response_model=schemas.CompletedExercisesOut)
 def update_exercise(updated_exercises: schemas.CompletedExercises, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
