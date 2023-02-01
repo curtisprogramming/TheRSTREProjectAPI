@@ -8,6 +8,7 @@ class UserBase(BaseModel):
     username: str
     password: str
     phone_number: Optional[str]
+    completed_exercises: dict
 
 #schema response for a user
 class UserOut(BaseModel):
@@ -103,6 +104,12 @@ class JournalEntryOut(JournalEntry):
     class Config:
         orm_mode = True
 
+#schema for completed exercise
+class CompletedExercises(BaseModel):
+    completed_exercises: dict
 
-
+#schema for completed exercises response
+class CompletedExercisesOut(CompletedExercises):
+    class Config:
+        orm_mode = True
 
