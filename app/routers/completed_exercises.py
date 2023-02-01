@@ -26,6 +26,7 @@ def update_exercise(updated_exercises: schemas.CompletedExercises, db: Session =
     user.completed_exercises = updated_exercises.dict()
 
     updated_user = utils.row_to_dict(user)
+    updated_user["completed_exercises"]["completion_date"] = str(updated_user["completed_exercises"]["completion_date"])
     user_query.update(updated_user, synchronize_session=False)
 
     db.commit()

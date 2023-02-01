@@ -106,7 +106,8 @@ class JournalEntryOut(JournalEntry):
 
 #schema for completed exercise
 class CompletedExercises(BaseModel):
-    completed_exercises: dict
+    completed_exercises: List[str]
+    completion_date: datetime
 
 #schema for completed exercises response
 class CompletedExercisesOut(CompletedExercises):
