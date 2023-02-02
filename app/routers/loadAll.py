@@ -10,12 +10,12 @@ router = APIRouter(
     tags=["Load All Data"]
 )
 
-@router.get("/")#, response_model=schemas.LoadAll)
+@router.get("/", response_model=schemas.LoadAll)
 def load_all(db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     exercises = db.query(sa_models.Exercise).all()
     resources = db.query(sa_models.Resource).all()
     prompts = db.query(sa_models.Prompt).all()
-    completed_exercises = db.query(sa_models.User.completed_exercises).filter(sa_models.User.id == current_user.id).first()
+    user = db.query(sa_models.User).filter(sa_models.User.id == current_user.id).first()
 
-    return schemas.LoadAll(exercises=exercises, resources=resources, prompts=prompts, completed_exercises=completed_exercises.completed_exercises)
+    return schemas.LoadAll(exercises=exercises, resources=resources, prompts=prompts, completed_exercise_info=user.completed_exercise_info)

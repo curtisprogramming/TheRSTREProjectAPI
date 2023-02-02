@@ -119,7 +119,7 @@ class LoadAll(BaseModel):
     exercises: List[ExerciseOut]
     resources: List[ResourceOut]
     prompts: List[PromptOut]
-    completed_exercises: CompletedExerciseInfoOut
+    completed_exercise_info: CompletedExerciseInfoOut
 
     class Config:
         orm_mode = True
