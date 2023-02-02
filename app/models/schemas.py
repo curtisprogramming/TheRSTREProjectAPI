@@ -105,12 +105,12 @@ class JournalEntryOut(JournalEntry):
         orm_mode = True
 
 #schema for completed exercise
-class CompletedExercises(BaseModel):
+class CompletedExerciseInfo(BaseModel):
     completed_exercises: Dict[str, bool]
     completion_date: datetime
 
 #schema for completed exercises response
-class CompletedExercisesOut(CompletedExercises):
+class CompletedExerciseInfoOut(CompletedExerciseInfo):
     class Config:
         orm_mode = True
 
@@ -119,7 +119,7 @@ class LoadAll(BaseModel):
     exercises: List[ExerciseOut]
     resources: List[ResourceOut]
     prompts: List[PromptOut]
-    completed_exercises: CompletedExercisesOut
+    completed_exercises: CompletedExerciseInfoOut
 
     class Config:
         orm_mode = True
