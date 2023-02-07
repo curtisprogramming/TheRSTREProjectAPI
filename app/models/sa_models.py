@@ -15,6 +15,7 @@ class User(Base):
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     phone_number = Column(String, nullable=True)
     completed_exercise_info = Column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))
+    journal_entries = Column(JSONB, nullable=True, server_default=text("'{}'::jsonb"))
 
 class Resource(Base):
     __tablename__ = "resources"
@@ -32,17 +33,6 @@ class Exercise(Base):
     name = Column(String, nullable=False)
     description = Column(String, nullable=False)
     image_name = Column(String, nullable=False)
-
-class JournalEntry(Base):
-    __tablename__ = "journalEntries"
-    id = Column(Integer, primary_key=True, nullable=False)
-    owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    title = Column(String, nullable=True)
-    type = Column(String, nullable=False)
-    created_at = Column(String, nullable=False, server_default=text('now()'))
-    tags = Column(ARRAY(String), nullable=True)
-    elements = Column(ARRAY(JSONB), nullable=True)
-
 
 class Prompt(Base):
     __tablename__ = "prompts"
