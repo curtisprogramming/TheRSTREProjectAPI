@@ -1,7 +1,8 @@
 from typing import Optional, List
 from fastapi import FastAPI, Response, status, HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
-from ..models import schemas, sa_models
+from ..models import sa_models
+from ..models.schemas import Exercise
 from ..utilities import oauth2, utils
 from .. import database
 
@@ -10,7 +11,7 @@ router = APIRouter(
     tags=["Exercises"]
 )
 
-@router.get("/", response_model=List[schemas.ExerciseOut])
+@router.get("/", response_model=List[Exercise.ExerciseOut])
 def get_exercises(db: Session = Depends(database.get_db)):
    
     query = db.query(sa_models.Exercise)
@@ -18,8 +19,8 @@ def get_exercises(db: Session = Depends(database.get_db)):
 
     return exercises
 
-@router.post("/", response_model=List[schemas.ExerciseOut])
-def create_exercise(exercises: List[schemas.ExerciseBase], status_code=status.HTTP_201_CREATED, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+@router.post("/", response_model=List[Exercise.ExerciseOut])
+def create_exercise(exercises: List[Exercise.ExerciseBase], status_code=status.HTTP_201_CREATED, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     if not current_user.admin:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
@@ -35,7 +36,7 @@ def create_exercise(exercises: List[schemas.ExerciseBase], status_code=status.HT
 
     return updated_exercises
 
-@router.get("/{id}", response_model=schemas.ExerciseOut)
+@router.get("/{id}", response_model=Exercise.ExerciseOut)
 def get_exercise(id: int, db: Session = Depends(database.get_db)):
 
     exercise = db.query(sa_models.Exercise).filter(sa_models.Exercise.id == id).first()
@@ -45,8 +46,8 @@ def get_exercise(id: int, db: Session = Depends(database.get_db)):
 
     return exercise
 
-@router.put("/{id}", response_model=schemas.ExerciseOut)
-def update_exercise(id: int, updated_exercise: schemas.ExerciseBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+@router.put("/{id}", response_model=Exercise.ExerciseOut)
+def update_exercise(id: int, updated_exercise: Exercise.ExerciseBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     exercise_query = db.query(sa_models.Exercise).filter(sa_models.Exercise.id == id)
     exercise = exercise_query.first()

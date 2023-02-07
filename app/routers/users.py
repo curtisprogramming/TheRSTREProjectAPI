@@ -2,7 +2,8 @@ from typing import Optional, List
 from fastapi import FastAPI, Response, status, HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from ..models import schemas, sa_models
+from ..models import sa_models
+from ..models.schemas import UserData
 from ..utilities import oauth2, utils
 from .. import database
 
@@ -12,7 +13,7 @@ router = APIRouter(
 )
 
 #GET USERS - gets all the users 
-@router.get("/", response_model=List[schemas.UserOut])
+@router.get("/", response_model=List[UserData.UserOut])
 def get_users(db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     users = db.query(sa_models.User).all()
@@ -23,8 +24,8 @@ def get_users(db: Session = Depends(database.get_db), current_user: int = Depend
     return users
 
 #CREATE USER - creates a new user
-@router.post("/", response_model=schemas.UserOut)
-def create_user(user: schemas.UserBase, status_code=status.HTTP_201_CREATED, db: Session = Depends(database.get_db)):
+@router.post("/", response_model=UserData.UserOut)
+def create_user(user: UserData.UserBase, status_code=status.HTTP_201_CREATED, db: Session = Depends(database.get_db)):
     
     #hash the password
     hashed_pwd = utils.hash(user.password)
@@ -51,7 +52,7 @@ def create_user(user: schemas.UserBase, status_code=status.HTTP_201_CREATED, db:
 
 
 #GET USER - gets a user with a certain id
-@router.get("/{id}", response_model=schemas.UserOut)
+@router.get("/{id}", response_model=UserData.UserOut)
 def get_user(id: int, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     user = db.query(sa_models.User).filter(sa_models.User.id == id).first() 
@@ -87,8 +88,8 @@ def delete_user(id: int, db: Session = Depends(database.get_db), current_user: i
 
 
 #UPDATE USER - updates the user
-@router.put("/{id}", response_model=schemas.UserOut)
-def update_user(id: int, updated_user: schemas.UserUpdate, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+@router.put("/{id}", response_model=UserData.UserOut)
+def update_user(id: int, updated_user: UserData.UserUpdate, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     user_query = db.query(sa_models.User).filter(sa_models.User.id == id)
     user = user_query.first()

@@ -1,7 +1,8 @@
 from typing import Optional, List
 from fastapi import FastAPI, Response, status, HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
-from ..models import schemas, sa_models
+from ..models import sa_models
+from ..models.schemas import UserData
 from ..utilities import oauth2, utils
 from .. import database
 
@@ -10,7 +11,9 @@ router = APIRouter(
     tags=["Completed Exercise Info"]
 )
 
-@router.get("/", response_model=schemas.CompletedExerciseInfoOut)
+completedInfo = UserData.CompletedExerciseInfo
+
+@router.get("/", response_model=completedInfo.CompletedExerciseInfoOut)
 def get_exercises(db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
    
     query = db.query(sa_models.User.completed_exercise_info).filter(sa_models.User.id == current_user.id)
@@ -18,8 +21,8 @@ def get_exercises(db: Session = Depends(database.get_db), current_user: int = De
 
     return completed_exercises_col.completed_exercise_info
 
-@router.put("/", response_model=schemas.CompletedExerciseInfoOut)
-def update_exercise(updated_exercises: schemas.CompletedExerciseInfo, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+@router.put("/", response_model=completedInfo.CompletedExerciseInfoOut)
+def update_exercise(updated_exercises: completedInfo.CompletedExerciseInfoBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     user_query = db.query(sa_models.User).filter(sa_models.User.id == current_user.id)
     user = user_query.first()

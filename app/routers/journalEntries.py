@@ -1,7 +1,8 @@
 from typing import Optional, List
 from fastapi import FastAPI, Response, status, HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
-from ..models import schemas, sa_models
+from ..models import sa_models
+from ..models.schemas import UserData 
 from ..utilities import oauth2, utils
 from .. import database
 
@@ -10,15 +11,17 @@ router = APIRouter(
     tags=["Journal Entires"]
 )
 
-@router.get("/", response_model=schemas.JournalEntryOut)
+journalEntries = UserData.JournalEntries
+
+@router.get("/", response_model=journalEntries.JournalEntryOut)
 def get_journal_entries(db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     journal_entries = db.query(sa_models.JournalEntry).filter(sa_models.JournalEntry.owner_id == current_user.id).all()
 
     return journal_entries
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.JournalEntryOut)
-def create_journal_entry(journal_entry: schemas.JournalEntry, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=journalEntries.JournalEntryOut)
+def create_journal_entry(journal_entry: journalEntries.JournalEntryBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
     
     new_entry = sa_models.JournalEntry(owner_id=current_user.id, **journal_entry.dict())
 
@@ -28,7 +31,7 @@ def create_journal_entry(journal_entry: schemas.JournalEntry, db: Session = Depe
 
     return new_entry
 
-@router.get("/{id}", response_model=schemas.JournalEntryOut)
+@router.get("/{id}", response_model=journalEntries.JournalEntryOut)
 def get_journal_entry(id: int, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     journal_entry = db.query(sa_models.JournalEntry).filter(sa_models.JournalEntry.id == id).first()
@@ -42,7 +45,7 @@ def get_journal_entry(id: int, db: Session = Depends(database.get_db), current_u
     return journal_entry
 
 @router.put("/{id}")#, response_model=schemas.JournalEntryOut)
-def update_journal_entry(id: int, updated_entry: schemas.JournalEntry, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+def update_journal_entry(id: int, updated_entry: journalEntries.JournalEntryBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     entry_query = db.query(sa_models.JournalEntry).filter(sa_models.JournalEntry.id == id)
     journal_entry = entry_query.first()
