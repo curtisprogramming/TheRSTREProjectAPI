@@ -66,7 +66,6 @@ class UserData:
         username: str
         password: str
         phone_number: Optional[str]
-        completed_exercises: dict
 
     #schema response for a user
     class UserOut(BaseModel):
@@ -90,13 +89,12 @@ class UserData:
         class JournalEntryBase(BaseModel):
             title: str
             type: str
-            tags: Optional[list]
+            tags: Optional[List[str]]
             elements: Optional[List[Dict[str, str]]]
 
         #schema for journal entry response
         class JournalEntryOut(JournalEntryBase):
-            id: int
-            owner_id: int
+            id: str
             created_at: datetime
 
             class Config:
