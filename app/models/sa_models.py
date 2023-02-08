@@ -15,7 +15,7 @@ class User(Base):
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     phone_number = Column(String, nullable=True)
     completed_exercise_info = Column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))
-    journal_entries = Column(JSONB, nullable=True, server_default=text("'{}'::jsonb"))
+    journal_entries = Column(JSONB, nullable=True, server_default=text("'[]'::jsonb"))
 
 class Resource(Base):
     __tablename__ = "resources"
