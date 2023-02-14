@@ -106,4 +106,4 @@ def delete_journal_entry(id: str, db: Session = Depends(database.get_db), curren
     user_query.update(utils.row_to_dict(user), synchronize_session=False)
     db.commit()
 
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return Response(status_code=status.HTTP_204_NO_CONTENT) 
