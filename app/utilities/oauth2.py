@@ -1,6 +1,7 @@
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
-from ..models import schemas, sa_models
+from ..models import sa_models
+from ..models.schemas import Token
 from .. import database
 from fastapi import Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer
@@ -34,7 +35,7 @@ def verify_access_token(token: str, credentials_exception):
         if id is None:
             raise credentials_exception
 
-        token_data = schemas.tokenData(id=id, admin=admin)
+        token_data = Token.TokenData(id=id, admin=admin)
 
     except JWTError:
         raise credentials_exception
