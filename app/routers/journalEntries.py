@@ -2,9 +2,12 @@ from typing import Optional, List
 from fastapi import FastAPI, Response, status, HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
 from ..models import sa_models
-from ..models.schemas import UserData 
+from ..models.schemas import UserData
 from ..utilities import oauth2, utils
 from .. import database
+import uuid
+from datetime import datetime
+import pytz
 
 router = APIRouter(
     prefix="/journalentries",
@@ -13,67 +16,94 @@ router = APIRouter(
 
 journalEntries = UserData.JournalEntries
 
-@router.get("/", response_model=journalEntries.JournalEntryOut)
+@router.get("/", response_model=List[journalEntries.JournalEntryOut])
 def get_journal_entries(db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
-    journal_entries = db.query(sa_models.JournalEntry).filter(sa_models.JournalEntry.owner_id == current_user.id).all()
+    journal_entries_col = db.query(sa_models.User.journal_entries).filter(sa_models.User.id == current_user.id).first()
 
-    return journal_entries
+    return journal_entries_col.journal_entries
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=journalEntries.JournalEntryOut)
-def create_journal_entry(journal_entry: journalEntries.JournalEntryBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+def create_journal_entry(new_journal_entry: journalEntries.JournalEntryBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+
+    user_query = db.query(sa_models.User).filter(sa_models.User.id == current_user.id)
+    user = user_query.first()
     
-    new_entry = sa_models.JournalEntry(owner_id=current_user.id, **journal_entry.dict())
+    #creates the new journal entry with defaults for id and time
+    journal_entry_dict = new_journal_entry.dict()
+    id = str(uuid.uuid1())
+    journal_entry_dict['id'] = id
+    journal_entry_dict['created_at'] = datetime.now(pytz.utc).isoformat()
+    
+    #updates user with the new journal entry
+    user.journal_entries.append(journal_entry_dict)
 
-    db.add(new_entry)
+    updated_user = utils.row_to_dict(user)
+    user_query.update(updated_user, synchronize_session=False)
+
     db.commit()
-    db.refresh(new_entry)
 
-    return new_entry
+    return journal_entry_dict
 
 @router.get("/{id}", response_model=journalEntries.JournalEntryOut)
-def get_journal_entry(id: int, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+def get_journal_entry(id: str, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
-    journal_entry = db.query(sa_models.JournalEntry).filter(sa_models.JournalEntry.id == id).first()
-
-    if not journal_entry:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Journal entry with id: {id} does not exist")
-
-    if current_user.id != journal_entry.owner_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Unauthorized to access with user id: {id}")
+    user = db.query(sa_models.User).filter(sa_models.User.id == current_user.id).first()
     
-    return journal_entry
+    journal_entries = user.journal_entries
+    journal_entries_index = utils.Search.linear_search_id(journal_entries, id)
 
-@router.put("/{id}")#, response_model=schemas.JournalEntryOut)
-def update_journal_entry(id: int, updated_entry: journalEntries.JournalEntryBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+    if journal_entries_index == -1:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Journal entry with id: {id} does not exist")
+    
+    return journal_entries[journal_entries_index]
 
-    entry_query = db.query(sa_models.JournalEntry).filter(sa_models.JournalEntry.id == id)
-    journal_entry = entry_query.first()
+@router.put("/{id}", response_model=journalEntries.JournalEntryOut)
+def update_journal_entry(id: str, updated_entry: journalEntries.JournalEntryBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
-    if not journal_entry:
+    user_query = db.query(sa_models.User).filter(sa_models.User.id == current_user.id)
+    user = user_query.first()
+
+    journal_entries = user.journal_entries
+    journal_entries_index = utils.Search.linear_search_id(journal_entries, id)
+
+    #saves he data not included in the updated data
+    entry_id = journal_entries[journal_entries_index]['id']
+    created_at = journal_entries[journal_entries_index]['created_at']
+
+    #sets the data not included in the updated data
+    journal_entry_dict = updated_entry.dict()
+    journal_entry_dict['id'] = entry_id
+    journal_entry_dict['created_at'] = created_at
+    
+    #replaces the old data
+    journal_entries[journal_entries_index] = journal_entry_dict
+
+    if journal_entries_index == -1:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Journal entry with id: {id} does not exist")
 
-    if current_user.id != journal_entry.owner_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Unauthorized to access with user id: {id}")
-
-    entry_query.update(updated_entry.dict(), synchronize_session=False)
+    user_query.update(utils.row_to_dict(user), synchronize_session=False)
     db.commit()
 
-    return entry_query
+    return journal_entries[journal_entries_index]
 
 @router.delete("/{id}")
-def delete_journal_entry(id: int, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+def delete_journal_entry(id: str, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
-    entry_query = db.query(sa_models.JournalEntry).filter(sa_models.JournalEntry.id == id)
-    journal_entry = entry_query.first()
+    user_query = db.query(sa_models.User).filter(sa_models.User.id == current_user.id)
+    user = user_query.first()
 
-    if not journal_entry:
+    journal_entries = user.journal_entries
+    journal_entry_index = utils.Search.linear_search_id(journal_entries, id)
+    journal_entries.pop(journal_entry_index)
+
+    user.journal_entries = journal_entries
+
+    if journal_entry_index == -1:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Journal entry with id: {id} does not exist")
 
-    if current_user.id != journal_entry.owner_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Unauthorized to access with user id: {id}")
 
-    entry_query.delete(synchronize_session=False)
+    user_query.update(utils.row_to_dict(user), synchronize_session=False)
     db.commit()
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
