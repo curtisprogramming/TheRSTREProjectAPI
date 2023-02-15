@@ -135,7 +135,7 @@ class Extras:
         resources: List[Resource.ResourceOut]
         prompts: List[Prompt.PromptOut]
         completed_exercise_info: UserData.CompletedExerciseInfo.CompletedExerciseInfoOut
-        journal_entries: UserData.JournalEntries.JournalEntryOut
+        journal_entries: List[UserData.JournalEntries.JournalEntryOut]
 
     class Config:
         orm_mode = True
