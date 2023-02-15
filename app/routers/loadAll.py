@@ -19,4 +19,4 @@ def load_all(db: Session = Depends(database.get_db), current_user: int = Depends
     prompts = db.query(sa_models.Prompt).all()
     user = db.query(sa_models.User).filter(sa_models.User.id == current_user.id).first()
 
-    return extra_schemas.LoadAll(exercises=exercises, resources=resources, prompts=prompts, completed_exercise_info=user.completed_exercise_info)
+    return extra_schemas.LoadAll(exercises=exercises, resources=resources, prompts=prompts, completed_exercise_info=user.completed_exercise_info, journal_entries=user.journal_entries)
