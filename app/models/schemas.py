@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, validator
 from typing import List, Dict, Optional
 from datetime import datetime
 
@@ -46,6 +46,35 @@ class Prompt:
         class Config:
             orm_mode = True
 
+class JournalElement(BaseModel):
+
+    type: str
+    element_data: Dict[str, str]
+
+
+    class WriteElement:
+
+        class WriteElementBase(BaseModel):
+            text: str
+
+        class WriteElementOut(WriteElementBase):
+            
+            class Config:
+                orm_mode = True
+
+
+    class PromptElement:
+        #schema for the prompt element
+        class PromptElementBase(BaseModel):
+            prompt: str
+            response: str
+
+        #schema for the element response
+        class PromtElementOut(PromptElementBase):
+            id: int
+
+            class Config:
+                orm_mode = True
 
 class UserData:
 
@@ -90,27 +119,21 @@ class UserData:
             title: str
             type: str
             tags: Optional[List[str]]
-            elements: Optional[List[Dict[str, str]]]
+            elements: Optional[List[JournalElement]]
+
+            @validator('elements', each_item=True)
+            def must_be_journal_element(cls, element):
+                
+                if element.type == "write":
+                    JournalElement.WriteElement.WriteElementBase(**element.element_data) #validates incoming data
+                    return element
+                
+                #elif element.type == "":
 
         #schema for journal entry response
         class JournalEntryOut(JournalEntryBase):
             id: str
             created_at: datetime
-
-            class Config:
-                orm_mode = True
-
-class JournalElements:
-
-    class PromptElement:
-        #schema for the prompt element
-        class PromptElementBase(BaseModel):
-            prompt: str
-            response: str
-
-        #schema for the element response
-        class PromtElementOut(PromptElementBase):
-            id: int
 
             class Config:
                 orm_mode = True
