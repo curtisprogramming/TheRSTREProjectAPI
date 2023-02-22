@@ -142,7 +142,7 @@ class UserData:
     class UserUpdate(BaseModel):
         phone_number: Optional[str]
         username: str
-        email: str
+        email: EmailStr
 
     class JournalEntries:
         #schema for journal entries
