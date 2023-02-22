@@ -58,10 +58,41 @@ class JournalElement(BaseModel):
             text: str
 
         class WriteElementOut(WriteElementBase):
+            id: str
             
             class Config:
                 orm_mode = True
 
+    class ReflectionElement:
+
+        class ReflectionElementBase(BaseModel):
+            event: str
+            reflection: str
+
+        class ReflectionElementOut(ReflectionElementBase):
+            class Config:
+                orm_mode = True
+
+    class ThanksElement:
+
+        class ThanksElementBase(BaseModel):
+            thankful_for: str
+            why: str
+
+        class ThanksElementOut(ThanksElementBase):
+            
+            class Config:
+                orm_mode = True
+
+    class ThoughtsElement:
+
+        class ThoughtsElementBase(BaseModel):
+            thoughts: List[str]
+
+        class ThoughtsElementOut(ThoughtsElementBase):
+
+            class Config:
+                orm_mode = True
 
     class PromptElement:
         #schema for the prompt element
@@ -122,18 +153,53 @@ class UserData:
             elements: Optional[List[JournalElement]]
 
             @validator('elements', each_item=True)
-            def must_be_journal_element(cls, element):
+            def must_be_journal_element_base(cls, element):
+                type = element.type
                 
-                if element.type == "write":
+                if type == "write":
                     JournalElement.WriteElement.WriteElementBase(**element.element_data) #validates incoming data
                     return element
+
+                elif type == "reflection":
+                    JournalElement.ReflectionElement.ReflectionElementBase(**element.element_data)
+                    return element
                 
-                #elif element.type == "":
+                elif type == "thanks":
+                    JournalElement.ThanksElement.ThanksElementBase(**element.element_data)
+
+                elif type == "thoughts":
+                    JournalElement.ThoughtsElement.ThoughtsElementBase(**element.element_data)
+
+                elif type == "prompt":
+                    JournalElement.PromptElement.PromptElementBase(**element.element_data)
+    
+                #left of here testing validaion
+
+                else:
+                    raise ValueError(f"{element.type} is not a valid journal element")
 
         #schema for journal entry response
         class JournalEntryOut(JournalEntryBase):
             id: str
             created_at: datetime
+        
+            @validator('elements', each_item=True)
+            def must_be_journal_element_out(cls, element):
+                type = element.type
+                print(type)
+                if type == "write":
+                    JournalElement.WriteElement.WriteElementOut(**element.element_data) #validates incoming data
+                    return element
+
+                elif type == "reflection":
+                    JournalElement.ReflectionElement.ReflectionElementOut(**element.element_data)
+                    return element
+                
+                elif type == "thanks":
+                    JournalElement.ThanksElement.ThanksElementOut(**element.element_data)
+
+                else:
+                    raise ValueError(f"{element.type} is not a valid journal element")
 
             class Config:
                 orm_mode = True
