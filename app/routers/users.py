@@ -24,8 +24,8 @@ def get_users(db: Session = Depends(database.get_db), current_user: int = Depend
     return users
 
 #CREATE USER - creates a new user
-@router.post("/", response_model=UserData.UserOut)
-def create_user(user: UserData.UserBase, status_code=status.HTTP_201_CREATED, db: Session = Depends(database.get_db)):
+@router.post("/", response_model=UserData.UserOut, status_code=status.HTTP_201_CREATED)
+def create_user(user: UserData.UserBase, db: Session = Depends(database.get_db)):
     
     #hash the password
     hashed_pwd = utils.hash(user.password)
@@ -113,7 +113,7 @@ def update_user(id: int, updated_user: UserData.UserUpdate, db: Session = Depend
             else:
                 raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=err_msg)
 
-    elif "duplicate key value violates unique constraint \"users_username_key\"" in err_msg:
+    else:
        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Unauthorized to access user with id: {id}") 
 
     return user
