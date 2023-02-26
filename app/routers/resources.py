@@ -19,8 +19,8 @@ def get_resources(db: Session = Depends(database.get_db)):
 
     return resources
 
-@router.post("/", response_model=List[Resource.ResourceOut])
-def create_resource(resources: List[Resource.ResourceBase], status_code=status.HTTP_201_CREATED, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+@router.post("/", response_model=List[Resource.ResourceOut], status_code=status.HTTP_201_CREATED)
+def create_resource(resources: List[Resource.ResourceBase], db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     if not current_user.admin:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
