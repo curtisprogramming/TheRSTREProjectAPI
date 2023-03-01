@@ -19,8 +19,8 @@ def get_exercises(db: Session = Depends(database.get_db)):
 
     return exercises
 
-@router.post("/", response_model=List[Exercise.ExerciseOut])
-def create_exercise(exercises: List[Exercise.ExerciseBase], status_code=status.HTTP_201_CREATED, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+@router.post("/", response_model=List[Exercise.ExerciseOut], status_code=status.HTTP_201_CREATED)
+def create_exercise(exercises: List[Exercise.ExerciseBase], db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     if not current_user.admin:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
