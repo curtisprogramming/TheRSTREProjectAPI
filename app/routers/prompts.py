@@ -20,8 +20,8 @@ def get_prompts(db: Session = Depends(database.get_db)):
 
     return prompts
 
-@router.post("/", response_model=List[Prompt.PromptOut])
-def create_prompt(prompts: List[Prompt.PromptBase], status_code=status.HTTP_201_CREATED, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+@router.post("/", response_model=List[Prompt.PromptOut], status_code=status.HTTP_201_CREATED)
+def create_prompt(prompts: List[Prompt.PromptBase], db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     if not current_user.admin:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
