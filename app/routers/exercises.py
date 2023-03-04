@@ -23,7 +23,7 @@ def get_exercises(db: Session = Depends(database.get_db)):
 def create_exercise(exercises: List[Exercise.ExerciseBase], db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     if not current_user.admin:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"User with id: {current_user.id} is not an admin")
 
     updated_exercises = []
 
@@ -56,7 +56,7 @@ def update_exercise(id: int, updated_exercise: Exercise.ExerciseBase, db: Sessio
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Exercise with id: {id} does not exist")
 
     if not current_user.admin:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"User with id: {current_user.id} is not an admin")
 
     exercise_query.update(updated_exercise.dict(), synchronize_session=False)
     db.commit()
@@ -73,7 +73,7 @@ def delete_exercise(id: int, db: Session = Depends(database.get_db), current_use
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Exercise with id: {id} does not exist")
 
     if not current_user.admin:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"User with id: {current_user.id} is not an admin")
 
     exercise_query.delete(synchronize_session=False)
     db.commit()

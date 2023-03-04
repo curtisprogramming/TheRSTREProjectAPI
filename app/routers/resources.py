@@ -23,7 +23,7 @@ def get_resources(db: Session = Depends(database.get_db)):
 def create_resource(resources: List[Resource.ResourceBase], db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     if not current_user.admin:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"User with id: {current_user.id} is not an admin")
 
     updated_resources = []
 
@@ -56,7 +56,7 @@ def update_resource(id: int, updated_resource: Resource.ResourceBase, db: Sessio
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Resource with id: {id} does not exist")
 
     if not current_user.admin:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"User with id: {current_user.id} is not an admin")
 
     resource_query.update(updated_resource.dict(), synchronize_session=False)
     db.commit()
@@ -72,7 +72,7 @@ def delete_resources(id: int, db: Session = Depends(database.get_db), current_us
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Resource with id: {id} does not exist")
 
     if not current_user.admin:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"User with id: {current_user.id} is not an admin")
 
     resource_query.delete(synchronize_session=False)
     db.commit()

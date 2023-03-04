@@ -24,7 +24,7 @@ def get_prompts(db: Session = Depends(database.get_db)):
 def create_prompt(prompts: List[Prompt.PromptBase], db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     if not current_user.admin:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"User with id: {current_user.id} is not an admin")
 
     updated_prompts = []
 
@@ -57,7 +57,7 @@ def update_prompt(id: int, updated_prompt: Prompt.PromptBase, db: Session = Depe
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Prompt with id: {id} does not exist")
 
     if not current_user.admin:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"User with id: {current_user.id} is not an admin")
 
     prompt_query.update(updated_prompt.dict(), synchronize_session=False)
     db.commit()
@@ -74,7 +74,7 @@ def delete_prompt(id: int, db: Session = Depends(database.get_db), current_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Prompt with id: {id} does not exist")
 
     if not current_user.admin:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User with id: {current_user.id} is not an admin")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"User with id: {current_user.id} is not an admin")
 
     prompt_query.delete(synchronize_session=False)
     db.commit()
