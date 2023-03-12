@@ -35,3 +35,19 @@ def update_exercise(updated_exercises: completedInfo.CompletedExerciseInfoBase, 
     db.commit()
 
     return updated_user["completed_exercise_info"]
+
+@router.get("/{id}", response_model=completedInfo.CompletedExerciseInfoOut)
+def get_one_exercise(id: int, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+
+    if id == current_user.id:
+        raise HTTPException(detail='Unauthorized to access user with id: {id}')
+
+    if not current_user.admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Unauthorized to access user with id: {id}")
+
+    query = db.query(sa_models.User).filter(sa_models.User.id == id)
+    completed_exercise_col = query.first()
+
+    return completed_exercise_col.completed_exercise_info
+
+
