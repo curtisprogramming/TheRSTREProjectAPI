@@ -39,15 +39,33 @@ def update_exercise(updated_exercises: completedInfo.CompletedExerciseInfoBase, 
 @router.get("/{id}", response_model=completedInfo.CompletedExerciseInfoOut)
 def get_one_exercise(id: int, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
-    if id == current_user.id:
-        raise HTTPException(detail='Unauthorized to access user with id: {id}')
+    if current_user.admin or id == current_user.id:
 
-    if not current_user.admin:
+        query = db.query(sa_models.User).filter(sa_models.User.id == id)
+        completed_exercise_col = query.first()
+
+        return completed_exercise_col.completed_exercise_info
+    
+    else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Unauthorized to access user with id: {id}")
 
-    query = db.query(sa_models.User).filter(sa_models.User.id == id)
-    completed_exercise_col = query.first()
+@router.put("/{id}", response_model=completedInfo.CompletedExerciseInfoOut)
+def update_exercises_by_id(id: int, updated_info: completedInfo.CompletedExerciseInfoBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
-    return completed_exercise_col.completed_exercise_info
+    if current_user.admin or id == current_user.id:
+       
+        user_query = db.query(sa_models.User).filter(sa_models.User.id == id)
+        user = user_query.first()
+        user.completed_exercise_info = updated_info.dict()
 
+        updated_user = utils.row_to_dict(user)
+        updated_user["completed_exercise_info"]["completion_date"] = str(updated_user["completed_exercise_info"]["completion_date"])
+        user_query.update(updated_user, synchronize_session=False)
+
+        db.commit()
+
+        return updated_user["completed_exercise_info"]
+    
+    else:
+         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Unauthorized to access user with id: {id}")
 
