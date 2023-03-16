@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-#posts, users, auth, vote
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import prompts, exercises, login, resources, users, journalEntries, completed_exercise_info, loadAll
 
