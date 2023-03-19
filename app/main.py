@@ -24,4 +24,4 @@ app.include_router(loadAll.router)
 
 @app.get("/")
 def root():
-    return {"message": "Hello Bigger Applications!!!!!!"} 
+    return "Welcome to The RSTRE Project API!!"
