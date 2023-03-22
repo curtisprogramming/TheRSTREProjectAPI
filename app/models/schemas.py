@@ -213,7 +213,7 @@ class Token:
 
     #Schema for the token payload data
     class TokenData(BaseModel):
-        id: str
+        user_id: int
         admin: bool
 
 class Extras:
