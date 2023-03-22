@@ -15,6 +15,10 @@ ALGORITHM = settings.algorithm
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes  
 
 def create_access_token(data: dict):
+
+    #validates data
+    Token.TokenData(**data)
+
     to_encode = data.copy()
 
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -35,7 +39,7 @@ def verify_access_token(token: str, credentials_exception):
         if id is None:
             raise credentials_exception
 
-        token_data = Token.TokenData(id=id, admin=admin)
+        token_data = Token.TokenData(user_id=id, admin=admin)
 
     except JWTError:
         raise credentials_exception
