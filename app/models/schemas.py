@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr, validator, Field
 from typing import List, Dict, Optional
 from datetime import datetime
 
@@ -50,7 +50,6 @@ class JournalElement(BaseModel):
 
     type: str
     element_data: Dict[str, str]
-
 
     class WriteElement:
 
@@ -109,6 +108,22 @@ class JournalElement(BaseModel):
 
 class UserData:
 
+    #schema for a user
+    class UserBase(BaseModel):
+        email: EmailStr
+        username: str
+        password: str
+        phone_number: Optional[str]
+
+    #schema response for a user
+    class UserOut(UserBase):
+        id: int
+        created_at: datetime
+        password: str = Field(exclude=True)
+
+        class Config:
+            orm_mode = True
+
     class CompletedExerciseInfo:
         #schema for completed exercise
         class CompletedExerciseInfoBase(BaseModel):
@@ -119,24 +134,6 @@ class UserData:
         class CompletedExerciseInfoOut(CompletedExerciseInfoBase):
             class Config:
                 orm_mode = True
-
-    #schema for a user
-    class UserBase(BaseModel):
-        email: EmailStr
-        username: str
-        password: str
-        phone_number: Optional[str]
-
-    #schema response for a user
-    class UserOut(BaseModel):
-        id: int
-        email: EmailStr
-        username: str
-        phone_number: Optional[str]
-        created_at: datetime
-
-        class Config:
-            orm_mode = True
 
     #schema for updating a user
     class UserUpdate(BaseModel):
@@ -174,6 +171,7 @@ class UserData:
                     JournalElement.PromptElement.PromptElementBase(**element.element_data)
     
                 #left of here testing validaion
+                #move to journal element class
 
                 else:
                     raise ValueError(f"{element.type} is not a valid journal element")
