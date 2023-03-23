@@ -188,10 +188,10 @@ def test_resource_base_no_call():
 def test_resource_out_correct():
 
     data = {"id": 100, "name": "Test Name", "url": "https://example.com", "categories": ["Category 1", "Category 2"], "text": True, "online_chat": True, "call": True}
-    exercise = schemas.Resource.ResourceOut(**data)
-    print(exercise.dict())
+    resource = schemas.Resource.ResourceOut(**data)
+    print(resource.dict())
 
-    assert exercise.dict() == data
+    assert resource.dict() == data
 
 def test_resource_out_no_id():
     data = {"name": "Test Name", "url": "https://example.com", "categories": ["Category 1", "Category 2"], "text": True, "online_chat": True, "call": True}
@@ -213,3 +213,63 @@ def test_resource_out_extends_resource_base():
 def test_resource_out_orm_mode():
 
     assert schemas.Resource.ResourceOut.Config.orm_mode == True
+
+
+
+
+
+
+#PROMPT
+#PROMPT BASE
+###############################################################################################
+def test_prompt_base_correct():
+    data = {"prompt": "This is a prompt"}
+
+    prompt = schemas.Prompt.PromptBase(**data)
+    print(prompt.dict())
+
+    assert prompt.dict() == data
+
+def test_prompt_base_no_prompt():
+    data = {}
+
+    try:
+         schemas.Prompt.PromptBase(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+    
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['prompt'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+#RESOURCE OUT
+#####################################################################################################################
+def test_prompt_out_correct():
+    data = {"id": 100,"prompt": "This is a prompt"}
+
+    prompt = schemas.Prompt.PromptOut(**data)
+    print(prompt.dict())
+
+    assert prompt.dict() == data
+
+def test_prompt_out_no_id():
+    data = {"prompt": "This is a prompt"}
+
+    try:
+        schemas.Prompt.PromptOut(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+    
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['id'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_prompt_out_extends_prompt_base():
+    
+    assert issubclass(schemas.Prompt.PromptOut, schemas.Prompt.PromptBase)
+
+def test_prompt_out_orm_mode():
+
+    assert schemas.Prompt.PromptOut.Config.orm_mode == True
