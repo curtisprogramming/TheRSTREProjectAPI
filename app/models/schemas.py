@@ -136,19 +136,10 @@ class UserData:
         class Config:
             orm_mode = True
 
-    class CompletedExerciseInfo:
-
-        #schema for completed exercise
-        class CompletedExerciseInfoBase(BaseModel):
-            completed_exercises: List[CompletedExercise]
-            completion_date: datetime
-
-            #@validator('completedexercises')
-
-        #schema for completed exercises response
-        class CompletedExerciseInfoOut(CompletedExerciseInfoBase):
-            class Config:
-                orm_mode = True
+    #schema for completed exercise
+    class CompletedExerciseInfo(BaseModel):
+        completed_exercises: List[CompletedExercise]
+        completion_date: datetime
 
     #schema for updating a user
     class UserUpdate(BaseModel):
@@ -236,7 +227,7 @@ class Extras:
         exercises: List[Exercise.ExerciseOut]
         resources: List[Resource.ResourceOut]
         prompts: List[Prompt.PromptOut]
-        completed_exercise_info: UserData.CompletedExerciseInfo.CompletedExerciseInfoOut
+        completed_exercise_info: UserData.CompletedExerciseInfo
         journal_entries: List[UserData.JournalEntries.JournalEntryOut]
 
     class Config:

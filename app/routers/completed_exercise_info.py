@@ -13,7 +13,7 @@ router = APIRouter(
 
 completedInfo = UserData.CompletedExerciseInfo
 
-@router.get("/", response_model=completedInfo.CompletedExerciseInfoOut)
+@router.get("/", response_model=completedInfo)
 def get_exercises(db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
    
     query = db.query(sa_models.User.completed_exercise_info).filter(sa_models.User.id == current_user.id)
@@ -21,8 +21,8 @@ def get_exercises(db: Session = Depends(database.get_db), current_user: int = De
 
     return completed_exercises_col.completed_exercise_info
 
-@router.put("/", response_model=completedInfo.CompletedExerciseInfoOut)
-def update_exercise(updated_exercises: completedInfo.CompletedExerciseInfoBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+@router.put("/", response_model=completedInfo)
+def update_exercise(updated_exercises: completedInfo, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     user_query = db.query(sa_models.User).filter(sa_models.User.id == current_user.id)
     user = user_query.first()
@@ -36,7 +36,7 @@ def update_exercise(updated_exercises: completedInfo.CompletedExerciseInfoBase, 
 
     return updated_user["completed_exercise_info"]
 
-@router.get("/{id}", response_model=completedInfo.CompletedExerciseInfoOut)
+@router.get("/{id}", response_model=completedInfo)
 def get_one_exercise(id: int, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     if current_user.admin or id == current_user.id:
@@ -49,8 +49,8 @@ def get_one_exercise(id: int, db: Session = Depends(database.get_db), current_us
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Unauthorized to access user with id: {id}")
 
-@router.put("/{id}", response_model=completedInfo.CompletedExerciseInfoOut)
-def update_exercises_by_id(id: int, updated_info: completedInfo.CompletedExerciseInfoBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+@router.put("/{id}", response_model=completedInfo)
+def update_exercises_by_id(id: int, updated_info: completedInfo, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     if current_user.admin or id == current_user.id:
        

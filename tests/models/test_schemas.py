@@ -521,7 +521,7 @@ def test_completed_exercise_extends_BaseModel():
 def test_completed_exercise_info_base_correct():
     data = {"completed_exercises": [{"exercise_name": "breathing", "completed": True}], "completion_date": "2023-03-23T17:20:10.576526+00:00"}
 
-    completed_exercise_info = schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase(**data)
+    completed_exercise_info = schemas.UserData.CompletedExerciseInfo(**data)
     completed_exercise_info_dict = completed_exercise_info.dict()
     completed_exercise_info_dict['completion_date'] = completed_exercise_info.completion_date.isoformat()
     print(completed_exercise_info_dict)
@@ -532,7 +532,7 @@ def test_completed_exercise_info_base_no_completed_exercises():
     data = {"completion_date": "2023-03-23T17:20:10.576526+00:00"}
 
     try:
-         schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase(**data)
+         schemas.UserData.CompletedExerciseInfo(**data)
     except ValidationError as err:
         error_dict = loads(err.json())
         print(error_dict)
@@ -545,7 +545,7 @@ def test_completed_exercise_info_base_no_completion_date():
     data = {"completed_exercises": [{"exercise_name": "breathing", "completed": True}]}
 
     try:
-         schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase(**data)
+         schemas.UserData.CompletedExerciseInfo(**data)
     except ValidationError as err:
         error_dict = loads(err.json())
         print(error_dict)
@@ -558,7 +558,7 @@ def test_completed_exercise_base_invalid_completed_exercises():
     data = {"completed_exercises": "This is not a list of complted exercises", "completion_date": "2023-03-23T17:20:10.576526+00:00"}
 
     try:
-        schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase(**data)
+        schemas.UserData.CompletedExerciseInfo(**data)
     except ValidationError as err:
         error_dict = loads(err.json())
         print(error_dict)
@@ -570,7 +570,7 @@ def test_completed_exercise_base_invalid_completion_date():
     data = {"completed_exercises": [{"exercise_name": "breathing", "completed": True}], "completion_date": "2023-03-23"}
 
     try:
-        schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase(**data)
+        schemas.UserData.CompletedExerciseInfo(**data)
     except ValidationError as err:
         error_dict = loads(err.json())
         print(error_dict)
@@ -579,6 +579,5 @@ def test_completed_exercise_base_invalid_completion_date():
     assert error_dict == [{'loc': ['completion_date'], 'msg': 'invalid datetime format', 'type': 'value_error.datetime'}]
 
 def test_user_base_extends_BaseModel():
-    assert issubclass(schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase, BaseModel)
+    assert issubclass(schemas.UserData.CompletedExerciseInfo, BaseModel)
 
-#LEFT OFF HERE ADDING SCHEMA TESTS (NEXT: COMPLETED EXERCISE OUT)
