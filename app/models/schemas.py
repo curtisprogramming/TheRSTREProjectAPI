@@ -124,28 +124,27 @@ class UserData:
     class UserBase(BaseModel):
         email: EmailStr
         username: str
-        password: str
         phone_number: Optional[str]
 
     #schema response for a user
     class UserOut(UserBase):
         id: int
         created_at: datetime
-        password: str = Field(exclude=True)
 
         class Config:
             orm_mode = True
+
+    class UserCreate(UserBase):
+        password: str
+
+    #schema for updating a user
+    class UserUpdate(UserBase):
+        pass
 
     #schema for completed exercise
     class CompletedExerciseInfo(BaseModel):
         completed_exercises: List[CompletedExercise]
         completion_date: datetime
-
-    #schema for updating a user
-    class UserUpdate(BaseModel):
-        phone_number: Optional[str]
-        username: str
-        email: EmailStr
 
     class JournalEntries:
         #schema for journal entries

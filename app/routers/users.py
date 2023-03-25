@@ -25,7 +25,7 @@ def get_users(db: Session = Depends(database.get_db), current_user: int = Depend
 
 #CREATE USER - creates a new user
 @router.post("/", response_model=UserData.UserOut, status_code=status.HTTP_201_CREATED)
-def create_user(user: UserData.UserBase, db: Session = Depends(database.get_db)):
+def create_user(user: UserData.UserCreate, db: Session = Depends(database.get_db)):
     
     #hash the password
     hashed_pwd = utils.hash(user.password)
