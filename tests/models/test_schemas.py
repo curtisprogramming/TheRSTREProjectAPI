@@ -378,7 +378,7 @@ def test_completed_exercise_extends_BaseModel():
 #USER BASE
 #############################################################################################################################
 def test_user_base_correct():
-    data = {"email": "example@gmail.com", "username": "test_username", "password": "test_password", "phone_number": "(123) 456-7890"}
+    data = {"email": "example@gmail.com", "username": "test_username", "phone_number": "(123) 456-7890"}
 
     user = schemas.UserData.UserBase(**data)
     print(user.dict())
@@ -386,7 +386,7 @@ def test_user_base_correct():
     assert user.dict() == data
 
 def test_user_base_no_email():
-    data = {"username": "test_username", "password": "test_password", "phone_number": "(123) 456-7890"}
+    data = {"username": "test_username", "phone_number": "(123) 456-7890"}
 
     try:
          schemas.UserData.UserBase(**data)
@@ -399,7 +399,7 @@ def test_user_base_no_email():
     assert error_dict == [{'loc': ['email'], 'msg': 'field required', 'type': 'value_error.missing'}]
 
 def test_user_base_no_username():
-    data = {"email": "example@gmail.com", "password": "test_password", "phone_number": "(123) 456-7890"}
+    data = {"email": "example@gmail.com", "phone_number": "(123) 456-7890"}
 
     try:
          schemas.UserData.UserBase(**data)
@@ -411,21 +411,8 @@ def test_user_base_no_username():
     assert raises(ValidationError)
     assert error_dict == [{'loc': ['username'], 'msg': 'field required', 'type': 'value_error.missing'}]
 
-def test_user_base_no_password():
-    data = {"email": "example@gmail.com", "username": "test_username", "phone_number": "(123) 456-7890"}
-
-    try:
-         schemas.UserData.UserBase(**data)
-    except ValidationError as err:
-        error_dict = loads(err.json())
-        print(error_dict)
-    
-
-    assert raises(ValidationError)
-    assert error_dict == [{'loc': ['password'], 'msg': 'field required', 'type': 'value_error.missing'}]
-
 def test_user_base_no_phone_number():
-    data = {"email": "example@gmail.com", "username": "test_username", "password": "test_password"}
+    data = {"email": "example@gmail.com", "username": "test_username"}
 
     user = schemas.UserData.UserBase(**data)
     print(user)
@@ -434,7 +421,7 @@ def test_user_base_no_phone_number():
     assert user.dict() == data
 
 def test_user_base_invalid_email():
-    data = {"email": "examplegmail.com", "username": "test_username", "password": "test_password", "phone_number": "(123) 456-7890"}
+    data = {"email": "examplegmail.com", "username": "test_username", "phone_number": "(123) 456-7890"}
 
     try:
         schemas.UserData.UserBase(**data)
@@ -444,8 +431,6 @@ def test_user_base_invalid_email():
 
     assert raises(ValidationError)
     assert error_dict == [{'loc': ['email'], 'msg': 'value is not a valid email address', 'type': 'value_error.email'}]
-
-
 
 def test_user_base_extends_BaseModel():
     assert issubclass(schemas.UserData.UserBase, BaseModel)
@@ -510,6 +495,42 @@ def test_user_out_orm_mode():
 
     assert schemas.UserData.UserOut.Config.orm_mode == True
 
+#USER CREATE
+def test_user_create_correct():
+    data = {"email": "example@gmail.com", "username": "test_username", "password": "test_password", "phone_number": "(123) 456-7890"}
+
+    user = schemas.UserData.UserCreate(**data)
+    print(user.dict())
+
+    assert user.dict() == data
+
+def test_user_create_no_password():
+    data = {"email": "example@gmail.com", "username": "test_username", "phone_number": "(123) 456-7890"}
+
+    try:
+         schemas.UserData.UserCreate(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+    
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['password'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_user_base_extends_BaseModel():
+    assert issubclass(schemas.UserData.UserCreate, schemas.UserData.UserBase)
+
+#USER UPDATE
+def test_user_update_correct():
+    data = {"email": "example@gmail.com", "username": "test_username", "phone_number": "(123) 456-7890"}
+
+    user = schemas.UserData.UserUpdate(**data)
+    print(user.dict())
+
+    assert user.dict() == data
+
+def test_user_update_extends_user_base():
+    assert issubclass(schemas.UserData.UserUpdate, schemas.UserData.UserBase)
 
 
 
@@ -579,3 +600,4 @@ def test_completed_exercise_base_invalid_completion_date():
 
 def test_user_base_extends_BaseModel():
     assert issubclass(schemas.UserData.CompletedExerciseInfo, BaseModel)
+
