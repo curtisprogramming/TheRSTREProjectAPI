@@ -419,3 +419,166 @@ def test_user_out_extends_prompt_base():
 def test_user_out_orm_mode():
 
     assert schemas.UserData.UserOut.Config.orm_mode == True
+
+
+
+
+
+
+#COMPLETED EXERCIISE INFO
+#COMPLETED EXERCISE
+############################################################################################
+def test_completed_exercise_breathing_correct():
+    data = {"exercise_name": "breathing", "completed": True}
+
+    completed_exercise = schemas.CompletedExercise(**data)
+    print(completed_exercise.dict())
+
+    assert completed_exercise.dict() == data
+
+def test_completed_exercise_journaling_correct():
+    data = {"exercise_name": "journaling", "completed": True}
+
+    completed_exercise = schemas.CompletedExercise(**data)
+    print(completed_exercise.dict())
+
+    assert completed_exercise.dict() == data
+
+def test_completed_exercise_stretching_correct():
+    data = {"exercise_name": "stretching", "completed": True}
+
+    completed_exercise = schemas.CompletedExercise(**data)
+    print(completed_exercise.dict())
+
+    assert completed_exercise.dict() == data
+
+def test_completed_exercise_meditating__correct():
+    data = {"exercise_name": "meditating", "completed": True}
+
+    completed_exercise = schemas.CompletedExercise(**data)
+    print(completed_exercise.dict())
+
+    assert completed_exercise.dict() == data
+
+def test_completed_exercise_no_exercise_name():
+    data = {"completed": True}
+
+    try:
+         schemas.CompletedExercise(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+    
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['exercise_name'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_completed_exercise_no_completed():
+    data = {"exercise_name": "meditating"}
+
+    try:
+        schemas.CompletedExercise(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+def test_completed_exercise_exercise_name_invalid_type():
+    data = {"exercise_name": "This is supposed to be the name of an exercise that exists", "completed": True}
+
+    try:
+        schemas.CompletedExercise(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+                
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['exercise_name'], 'msg': '\'This is supposed to be the name of an exercise that exists\' is not a valid exercise', 'type': 'value_error'}]
+
+def test_completed_exercise_completed_invalid_type():
+    data = {"exercise_name": "breathing", "completed": "This is supposed to be a boolean"}
+
+    try:
+        schemas.CompletedExercise(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+                
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['completed'], 'msg': 'value could not be parsed to a boolean', 'type': 'type_error.bool'}]
+
+def test_completed_exercise_extends_BaseModel():
+    assert issubclass(schemas.CompletedExercise, BaseModel)
+
+
+
+
+
+
+#COMPLETED EXERCISE INFO BASE
+################################################################################################################################
+def test_completed_exercise_info_base_correct():
+    data = {"completed_exercises": [{"exercise_name": "breathing", "completed": True}], "completion_date": "2023-03-23T17:20:10.576526+00:00"}
+
+    completed_exercise_info = schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase(**data)
+    completed_exercise_info_dict = completed_exercise_info.dict()
+    completed_exercise_info_dict['completion_date'] = completed_exercise_info.completion_date.isoformat()
+    print(completed_exercise_info_dict)
+
+    assert completed_exercise_info_dict == data
+
+def test_completed_exercise_info_base_no_completed_exercises():
+    data = {"completion_date": "2023-03-23T17:20:10.576526+00:00"}
+
+    try:
+         schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+    
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['completed_exercises'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_completed_exercise_info_base_no_completion_date():
+    data = {"completed_exercises": [{"exercise_name": "breathing", "completed": True}]}
+
+    try:
+         schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+    
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['completion_date'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_completed_exercise_base_invalid_completed_exercises():
+    data = {"completed_exercises": "This is not a list of complted exercises", "completion_date": "2023-03-23T17:20:10.576526+00:00"}
+
+    try:
+        schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['completed_exercises'], 'msg': 'value is not a valid list', 'type': 'type_error.list'}]
+
+def test_completed_exercise_base_invalid_completion_date():
+    data = {"completed_exercises": [{"exercise_name": "breathing", "completed": True}], "completion_date": "2023-03-23"}
+
+    try:
+        schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['completion_date'], 'msg': 'invalid datetime format', 'type': 'value_error.datetime'}]
+
+def test_user_base_extends_BaseModel():
+    assert issubclass(schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase, BaseModel)
+
+#LEFT OFF HERE ADDING SCHEMA TESTS (NEXT: COMPLETED EXERCISE OUT)
