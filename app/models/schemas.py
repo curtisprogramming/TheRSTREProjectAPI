@@ -106,6 +106,18 @@ class JournalElement(BaseModel):
             class Config:
                 orm_mode = True
 
+class CompletedExercise(BaseModel):
+    exercise_name: str
+    completed: bool
+
+    @validator('exercise_name')
+    def must_be_a_valid_exercise(cls, exercise_name):
+        exercises = ["breathing", "journaling", "stretching", "meditating"]
+        if exercise_name not in exercises:
+            raise ValueError(f"'{exercise_name}' is not a valid exercise")
+        else:
+            return exercise_name
+
 class UserData:
 
     #schema for a user
@@ -125,10 +137,13 @@ class UserData:
             orm_mode = True
 
     class CompletedExerciseInfo:
+
         #schema for completed exercise
         class CompletedExerciseInfoBase(BaseModel):
-            completed_exercises: Dict[str, bool]
+            completed_exercises: List[CompletedExercise]
             completion_date: datetime
+
+            #@validator('completedexercises')
 
         #schema for completed exercises response
         class CompletedExerciseInfoOut(CompletedExerciseInfoBase):
