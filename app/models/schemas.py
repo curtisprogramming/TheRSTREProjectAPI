@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, validator, Field
 from typing import List, Dict, Optional
 from datetime import datetime
+from fastapi import HTTPException, status
 
 
 class Exercise:
@@ -213,6 +214,13 @@ class Token:
     class TokenOut(BaseModel):
         access_token: str
         token_type: str
+            
+        @validator('token_type')
+        def must_be_correct_token_type(cls, token_type):
+            if token_type != 'bearer':
+                raise ValueError(f'{token_type} is not a valid token type')
+            else:
+                return token_type
 
     #Schema for the token payload data
     class TokenData(BaseModel):
