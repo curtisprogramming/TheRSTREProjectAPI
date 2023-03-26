@@ -601,3 +601,59 @@ def test_completed_exercise_base_invalid_completion_date():
 def test_user_base_extends_BaseModel():
     assert issubclass(schemas.UserData.CompletedExerciseInfo, BaseModel)
 
+
+
+
+
+
+#TOKEN
+#TOKEN OUT
+#################################################################################################################
+def test_token_out_correct():
+    data = {"access_token": "This is the token", "token_type": "bearer"}
+
+    token = schemas.Token.TokenOut(**data)
+    print(token.dict())
+
+    assert token.dict() == data
+
+def test_token_out_no_access_token():
+    data = {"token_type": "bearer"}
+
+    try:
+         schemas.Token.TokenOut(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+    
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['access_token'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_token_out_no_token_type():
+    data = {"access_token": "This is an access token"}
+
+    try:
+         schemas.Token.TokenOut(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+    
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['token_type'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_token_out_invalid_token_type():
+    data = {"access_token": "This is the token", "token_type": "Not Bearer"}
+
+    try:
+         schemas.Token.TokenOut(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['token_type'], 'msg': 'Not Bearer is not a valid token type', 'type': 'value_error'}]
+
+def test_token_out_extends_BaseModel():
+    assert issubclass(schemas.Token.TokenOut, BaseModel)
