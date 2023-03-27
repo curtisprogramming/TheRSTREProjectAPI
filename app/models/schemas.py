@@ -1,8 +1,6 @@
-from pydantic import BaseModel, EmailStr, validator, Field
+from pydantic import BaseModel, EmailStr, validator
 from typing import List, Dict, Optional
 from datetime import datetime
-from fastapi import HTTPException, status
-
 
 class Exercise:
     #schema for an exrcise
