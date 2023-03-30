@@ -3,3 +3,5 @@ venv/
 .env
 report.html
 .DS_Store
+coverage_report
+.coverage
