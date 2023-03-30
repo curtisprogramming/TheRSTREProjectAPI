@@ -2,7 +2,6 @@ from app.models import schemas
 from pytest import raises
 from pydantic import ValidationError, BaseModel
 from json import loads
-from typing import List
 
 #EXERCISES
 #EXERCISE BASE
