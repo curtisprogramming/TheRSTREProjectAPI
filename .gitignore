@@ -4,4 +4,4 @@ venv/
 report.html
 .DS_Store
 coverage_report
-.coverage
+coverage
