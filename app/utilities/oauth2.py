@@ -36,7 +36,7 @@ def verify_access_token(token: str, credentials_exception):
         id = payload.get("user_id")
         admin = payload.get("admin")
 
-        if id is None:
+        if id is None or admin is None:
             raise credentials_exception
 
         token_data = Token.TokenData(user_id=id, admin=admin)
