@@ -16,6 +16,7 @@ class User(Base):
     completed_exercise_info = Column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))
     journal_entries = Column(JSONB, nullable=True, server_default=text("'[]'::jsonb"))
 
+
 class Resource(Base):
     __tablename__ = "resources"
     id = Column(Integer, primary_key=True, nullable=False)
