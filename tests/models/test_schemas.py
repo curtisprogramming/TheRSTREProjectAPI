@@ -881,3 +881,281 @@ def test_load_all_invalid_completed_exercise_info():
 
 def test_load_all_extends_BaseModel():
     assert issubclass(schemas.Extras.LoadAll, BaseModel)
+
+
+
+
+
+
+#JOURNAL ELEMENT
+#######################################################################################################
+def test_journal_element_write_correct():
+    data = {"type": "write", "element_data": {"text": "This is my writing"}}
+
+    journal_element = schemas.JournalElement(**data)
+    print(journal_element.dict())
+
+    assert journal_element.dict() == data
+
+def test_journal_element_reflection_correct():
+    data = {"type": "reflection", "element_data": {"event": "This is my event", "reflection": "This is my reflection"}}
+
+    journal_element = schemas.JournalElement(**data)
+    print(journal_element.dict())
+
+    assert journal_element.dict() == data
+
+def test_journal_element_thanks_correct():
+    data = {"type": "thanks", "element_data": {"thankful_for": "This is what I'm thankful for", "why": "This is why I am thankful"}}
+
+    journal_element = schemas.JournalElement(**data)
+    print(journal_element.dict())
+
+    assert journal_element.dict() == data
+
+def test_journal_element_thoughts_correct():
+    data = {"type": "thoughts", "element_data": {"thoughts": ["Thought 1", "Thought 2", "Thought 3"]}}
+
+    journal_element = schemas.JournalElement(**data)
+    print(journal_element.dict())
+
+    assert journal_element.dict() == data
+
+def test_journal_element_prompt_correct():
+    data = {"type": "prompt", "element_data": {"prompt": "This is the prompt", "prompt_id": 100, "response": "This is my response"}}
+
+    journal_element = schemas.JournalElement(**data)
+    print(journal_element.dict())
+
+    assert journal_element.dict() == data
+
+def test_journal_entry_no_type():
+    data = {"element_data": {"prompt": "This is the prompt", "response": "This is my response"}}
+
+    try:
+        schemas.JournalElement(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['type'], 'msg': 'field required', 'type': 'value_error.missing'}, {'loc': ['element_data'], 'msg': 'None is not a valid journal entry type', 'type': 'value_error'}]
+
+def test_journal_entry_missing_element_data():
+    data = {"type": "prompt"}
+
+    try:
+        schemas.JournalElement(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['element_data'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+
+def test_journal_element_invalid_type():
+    data = {"type": "Invlaid type", "element_data": {"prompt": "This is the prompt", "response": "This is my response"}}
+
+    try:
+        schemas.JournalElement(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['element_data'], 'msg': 'Invlaid type is not a valid journal entry type', 'type': 'value_error'}]
+
+def test_journal_element_extends_BaseModel():
+    assert issubclass(schemas.JournalElement, BaseModel)
+
+
+
+
+
+
+#WRITE ELEMENT
+###############################################################################################################
+def test_write_element_correct():
+    data = {"text": "This is my write element"}
+
+    write_element = schemas.JournalElement.WriteElement(**data)
+    print(write_element.dict())
+
+    assert write_element.dict() == {'text': 'This is my write element'}
+
+def test_write_element_no_text():
+    data = {}
+
+    try:
+        schemas.JournalElement.WriteElement(**data)
+    
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['text'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_write_element_extends_base_model():
+    assert issubclass(schemas.JournalElement.WriteElement, BaseModel)
+
+
+
+
+
+#REFLECTION ELEMENT
+def test_reflection_element_correct():
+    data = {"event": "This is my event", "reflection": "This is my reflection"}
+
+    reflection_element = schemas.JournalElement.ReflectionElement(**data)
+    print(reflection_element.dict())
+
+    assert reflection_element.dict() == {'event': 'This is my event', 'reflection': 'This is my reflection'}
+
+def test_reflection_element_no_event():
+    data = {"reflection": "This is my reflection"}
+
+    try:
+        schemas.JournalElement.ReflectionElement(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['event'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_reflection_element_no_reflection():
+    data = {"event": "This is my event"}
+
+    try:
+        schemas.JournalElement.ReflectionElement(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['reflection'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_reflection_element_extends_base_model():
+    assert issubclass(schemas.JournalElement.WriteElement, BaseModel)
+
+
+
+
+
+
+#THANKS ELEMENT
+###########################################################################################################
+def test_thanks_element_correct():
+    data = {"thankful_for": "This is what I am thankful for", "why": "This is why I'm thankful for it"}
+
+    thanks_element = schemas.JournalElement.ThanksElement(**data)
+    print(thanks_element.dict())
+
+    assert thanks_element.dict() == {"thankful_for": "This is what I am thankful for", "why": "This is why I'm thankful for it"}
+
+def test_write_element_no_thankful_for():
+    data = {"why": "This is why I'm thankful for it"}
+
+    try:
+        schemas.JournalElement.ThanksElement(**data)
+    
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['thankful_for'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_write_element_no_why():
+    data = {"thankful_for": "This is what I am thankful for"}
+
+    try:
+        schemas.JournalElement.ThanksElement(**data)
+    
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['why'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_thanks_element_extends_base_model():
+    assert issubclass(schemas.JournalElement.ThanksElement, BaseModel)
+
+
+
+
+
+
+#THOUGHTS ELEMENT
+###########################################################################################################
+def test_thoughts_element_correct():
+    data = {"thoughts": ["Thought 1", "THought 2", "Thought 3"]}
+
+    thoughts_element = schemas.JournalElement.ThoughtsElement(**data)
+    print(thoughts_element.dict())
+
+    assert thoughts_element.dict() == {"thoughts": ["Thought 1", "THought 2", "Thought 3"]}
+
+def test_thoughts_element_no_thoughts():
+    data = {}
+
+    try:
+        schemas.JournalElement.ThoughtsElement(**data)
+    
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['thoughts'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_thoughts_element_extends_base_model():
+    assert issubclass(schemas.JournalElement.ThoughtsElement, BaseModel)
+
+
+
+
+
+
+#PROMPT ELEMENT
+###########################################################################################################
+def test_prompt_element_correct():
+    data = {"prompt": "This is a prompt", "prompt_id": 100, "response": 'This is my prompt response'}
+
+    prompt_element = schemas.JournalElement.PromptElement(**data)
+    print(prompt_element.dict())
+
+    assert prompt_element.dict() == {"prompt": "This is a prompt", "prompt_id": 100, "response": 'This is my prompt response'}
+
+def test_prompt_element_no_prompts():
+    data = {"prompt_id": 100, "response": 'This is my prompt response'}
+
+    try:
+        schemas.JournalElement.PromptElement(**data)
+    
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['prompt'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_prompt_element_no_prompt_id():
+    data = {"prompt": "This is a prompt", "response": 'This is my prompt response'}
+
+    try:
+        schemas.JournalElement.PromptElement(**data)
+    
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['prompt_id'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_prompt_element_no_response():
+    data = {"prompt": "This is a prompt", "prompt_id": 100}
+
+    try:
+        schemas.JournalElement.PromptElement(**data)
+    
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['response'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_prompt_element_extends_base_model():
+    assert issubclass(schemas.JournalElement.PromptElement, BaseModel)
