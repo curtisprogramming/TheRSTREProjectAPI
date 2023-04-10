@@ -14,7 +14,7 @@ router = APIRouter(
     tags=["Journal Entires"]
 )
 
-journalEntries = UserData.JournalEntries
+journalEntries = UserData.JournalEntry
 
 @router.get("/", response_model=List[journalEntries.JournalEntryOut])
 def get_journal_entries(db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):

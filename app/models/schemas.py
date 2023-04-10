@@ -139,22 +139,20 @@ class UserData:
         completed_exercises: List[CompletedExercise]
         completion_date: datetime
 
-    class JournalEntries:
+    class JournalEntry:
         #schema for journal entries
         class JournalEntryBase(BaseModel):
             title: str
             type: str
-            tags: Optional[List[str]]
-            elements: Optional[List[JournalElement]]
+            tags: List[str]
+            elements: List[JournalElement]
 
         #schema for journal entry response
         class JournalEntryOut(JournalEntryBase):
             id: str
             created_at: datetime
 
-            class Config:
-                orm_mode = True
-        
+
 class Token:
 
     #Schema for a token response 
