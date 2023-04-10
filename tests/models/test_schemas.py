@@ -2,6 +2,7 @@ from app.models import schemas
 from pytest import raises
 from pydantic import ValidationError, BaseModel
 from json import loads
+from typing import List, Optional
 
 #EXERCISES
 #EXERCISE BASE
@@ -929,7 +930,7 @@ def test_journal_element_prompt_correct():
 
     assert journal_element.dict() == data
 
-def test_journal_entry_no_type():
+def test_journal_element_no_type():
     data = {"element_data": {"prompt": "This is the prompt", "response": "This is my response"}}
 
     try:
@@ -940,7 +941,7 @@ def test_journal_entry_no_type():
 
     assert error_dict == [{'loc': ['type'], 'msg': 'field required', 'type': 'value_error.missing'}, {'loc': ['element_data'], 'msg': 'None is not a valid journal entry type', 'type': 'value_error'}]
 
-def test_journal_entry_missing_element_data():
+def test_journal_element_missing_element_data():
     data = {"type": "prompt"}
 
     try:
@@ -1159,3 +1160,122 @@ def test_prompt_element_no_response():
 
 def test_prompt_element_extends_base_model():
     assert issubclass(schemas.JournalElement.PromptElement, BaseModel)
+
+
+
+
+
+
+#JOURNAL ENTRY
+#JOURNAL ENTRY BASE
+###########################################################################################################
+def test_journal_entry_base_correct():
+    data = {"title": "This is a title", "type": "This is the type", "tags": ["Tag 1", "Tag 2", "Tag 3"], "elements": []}
+
+    journal_entry = schemas.UserData.JournalEntry.JournalEntryBase(**data)
+    print(journal_entry.dict())
+
+    assert journal_entry.dict() == {'title': 'This is a title', 'type': 'This is the type', 'tags': ['Tag 1', 'Tag 2', 'Tag 3'], 'elements': []}
+
+def test_journal_entry_base_element_type_correct():
+    print(schemas.UserData.JournalEntry.JournalEntryBase.__fields__['elements'])
+    assert str(schemas.UserData.JournalEntry.JournalEntryBase.__fields__['elements']) == "name='elements' type=List[JournalElement] required=True"
+
+def test_journal_entry_base_no_title():
+    data = {"type": "This is the type", "tags": ["Tag 1", "Tag 2", "Tag 3"], "elements": []}
+
+    try:
+        schemas.UserData.JournalEntry.JournalEntryBase(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['title'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_journal_entry_base_no_type():
+    data = {"title": "This is a title", "tags": ["Tag 1", "Tag 2", "Tag 3"], "elements": []}
+
+    try:
+        schemas.UserData.JournalEntry.JournalEntryBase(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['type'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_journal_entry_base_no_tags():
+    data = {"title": "This is a title", "type": "This is the type", "elements": []}
+
+    try:
+        schemas.UserData.JournalEntry.JournalEntryBase(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['tags'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_journal_entry_base_no_elements():
+    data = {"title": "This is a title", "type": "This is the type", "tags": ["Tag 1", "Tag 2", "Tag 3"]}
+
+    try:
+        schemas.UserData.JournalEntry.JournalEntryBase(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['elements'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_journal_entry_extends_base_model():
+    assert  issubclass(schemas.UserData.JournalEntry.JournalEntryBase, BaseModel)
+
+
+
+
+
+#JOURNAL ENTRY OUT
+###########################################################################################################
+def test_journal_entry_out_correct():
+    data = {"id": "kjdsj3kj4-kdmek2o3-234n34k", "created_at": "2023-03-23T17:20:10.576526+00:00", "title": "This is a title", "type": "This is the type", "tags": ["Tag 1", "Tag 2", "Tag 3"], "elements": []}
+
+    journal_entry = schemas.UserData.JournalEntry.JournalEntryOut(**data)
+    journal_entry_dict = journal_entry.dict()
+    journal_entry_dict['created_at'] = journal_entry.created_at.isoformat()
+    print(journal_entry_dict)
+
+    assert journal_entry_dict == {'title': 'This is a title', 'type': 'This is the type', 'tags': ['Tag 1', 'Tag 2', 'Tag 3'], 'elements': [], 'id': 'kjdsj3kj4-kdmek2o3-234n34k', 'created_at': '2023-03-23T17:20:10.576526+00:00'}
+
+def test_journal_entry_out_no_id():
+    data = {"created_at": "2023-03-23T17:20:10.576526+00:00", "title": "This is a title", "type": "This is the type", "tags": ["Tag 1", "Tag 2", "Tag 3"], "elements": []}
+
+    try:
+        schemas.UserData.JournalEntry.JournalEntryOut(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['id'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_journal_entry_out_no_created_at():
+    data = {"id": "kjdsj3kj4-kdmek2o3-234n34k", "title": "This is a title", "type": "This is the type", "tags": ["Tag 1", "Tag 2", "Tag 3"], "elements": []}
+
+    try:
+        schemas.UserData.JournalEntry.JournalEntryOut(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['created_at'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_journal_entry_out_invalid_created_at():
+    data = {"id": "kjdsj3kj4-kdmek2o3-234n34k", "created_at": "2023-03-23", "title": "This is a title", "type": "This is the type", "tags": ["Tag 1", "Tag 2", "Tag 3"], "elements": []}
+
+    try:
+        schemas.UserData.JournalEntry.JournalEntryOut(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert error_dict == [{'loc': ['created_at'], 'msg': 'invalid datetime format', 'type': 'value_error.datetime'}]
+
+def test_journal_entry_out_extends_journal_entry_base():
+    assert issubclass(schemas.UserData.JournalEntry.JournalEntryOut, schemas.UserData.JournalEntry.JournalEntryBase)
