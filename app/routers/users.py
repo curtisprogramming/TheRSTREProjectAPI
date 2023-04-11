@@ -6,6 +6,7 @@ from ..models import sa_models
 from ..models.schemas import UserData
 from ..utilities import oauth2, utils
 from .. import database
+from datetime import datetime
 
 router = APIRouter(
     prefix="/users",
@@ -31,11 +32,19 @@ def create_user(user: UserData.UserCreate, db: Session = Depends(database.get_db
     hashed_pwd = utils.hash(user.password)
     user.password = hashed_pwd
 
+    #sets completed_exerccise_info
+    user_dict = user.dict()
+    completed_exercise_info_dict = {"completion_date": datetime.now().isoformat(), "completed_exercises": []}
+    verified_completed_exercise_info = UserData.CompletedExerciseInfo(**completed_exercise_info_dict)
+    user_dict['completed_exercise_info'] = verified_completed_exercise_info.dict()
+    user_dict['completed_exercise_info']['completion_date'] = verified_completed_exercise_info.completion_date.isoformat()
+
     try:
-        new_user = sa_models.User(**user.dict())
+        new_user = sa_models.User(**user_dict)
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
+        
         
     except IntegrityError as err:
         err_msg = err.args[0]
