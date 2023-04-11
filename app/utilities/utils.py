@@ -16,3 +16,13 @@ def row_to_dict(row):
         converted_dict[column.name] = getattr(row, column.name)
 
     return converted_dict
+
+class Search:
+
+    def linear_search_id(arr, target):
+
+        for i in range(len(arr)):
+            if arr[i]['id'] == target:
+                return i
+
+        return -1
