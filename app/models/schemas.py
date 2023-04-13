@@ -78,7 +78,7 @@ class JournalElement(BaseModel):
             return element_data
 
         else:
-            raise ValueError(f"{type} is not a valid journal entry type")
+            raise ValueError(f"{type} is not a valid journal element type")
 
     class WriteElement(BaseModel):
         text: str
