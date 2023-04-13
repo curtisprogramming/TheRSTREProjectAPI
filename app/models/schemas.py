@@ -180,4 +180,4 @@ class Extras:
         resources: List[Resource.ResourceOut]
         prompts: List[Prompt.PromptOut]
         completed_exercise_info: UserData.CompletedExerciseInfo
-        #journal_entries: List[UserData.JournalEntries.JournalEntryOut]
+        journal_entries: List[UserData.JournalEntry.JournalEntryOut]
