@@ -939,7 +939,7 @@ def test_journal_element_no_type():
         error_dict = loads(err.json())
         print(error_dict)
 
-    assert error_dict == [{'loc': ['type'], 'msg': 'field required', 'type': 'value_error.missing'}, {'loc': ['element_data'], 'msg': 'None is not a valid journal entry type', 'type': 'value_error'}]
+    assert error_dict == [{'loc': ['type'], 'msg': 'field required', 'type': 'value_error.missing'}, {'loc': ['element_data'], 'msg': 'None is not a valid journal element type', 'type': 'value_error'}]
 
 def test_journal_element_missing_element_data():
     data = {"type": "prompt"}
@@ -962,7 +962,7 @@ def test_journal_element_invalid_type():
         error_dict = loads(err.json())
         print(error_dict)
 
-    assert error_dict == [{'loc': ['element_data'], 'msg': 'Invlaid type is not a valid journal entry type', 'type': 'value_error'}]
+    assert error_dict == [{'loc': ['element_data'], 'msg': 'Invlaid type is not a valid journal element type', 'type': 'value_error'}]
 
 def test_journal_element_extends_BaseModel():
     assert issubclass(schemas.JournalElement, BaseModel)
