@@ -135,9 +135,20 @@ class UserData:
         pass
 
     #schema for completed exercise
-    class CompletedExerciseInfo(BaseModel):
-        completed_exercises: List[CompletedExercise]
-        completion_date: datetime
+    class CompletedExerciseInfo():
+
+        class CompletedExerciseInfoBase(BaseModel):
+            completed_exercises: List[CompletedExercise]
+
+            @validator('completed_exercises')
+            def must_have_all_exercises(cls, completed_exercises):
+                if(len(completed_exercises) < 4):
+                    raise ValueError("There is a missing exercise")
+                
+                return completed_exercises
+
+        class CompletedExerciseInfoOut(CompletedExerciseInfoBase):
+            completion_date: datetime
 
     class JournalEntry:
         #schema for journal entries
@@ -179,5 +190,5 @@ class Extras:
         exercises: List[Exercise.ExerciseOut]
         resources: List[Resource.ResourceOut]
         prompts: List[Prompt.PromptOut]
-        completed_exercise_info: UserData.CompletedExerciseInfo
+        completed_exercise_info: UserData.CompletedExerciseInfo.CompletedExerciseInfoOut
         journal_entries: List[UserData.JournalEntry.JournalEntryOut]
