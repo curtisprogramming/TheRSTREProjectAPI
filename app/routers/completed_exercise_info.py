@@ -6,6 +6,7 @@ from ..models.schemas import UserData
 from ..utilities import oauth2, utils
 from .. import database
 from datetime import datetime
+import pytz
 
 router = APIRouter(
     prefix="/completed_exercise_info",
@@ -30,7 +31,7 @@ def update_exercise(updated_exercises: completedInfo.CompletedExerciseInfoBase, 
     user.completed_exercise_info = updated_exercises.dict()
 
     updated_user = utils.row_to_dict(user)
-    updated_user["completed_exercise_info"]["completion_date"] = datetime.now().isoformat()
+    updated_user["completed_exercise_info"]["completion_date"] = datetime.now(pytz.utc).isoformat()
     user_query.update(updated_user, synchronize_session=False)
 
     db.commit()
@@ -60,7 +61,7 @@ def update_exercises_by_id(id: int, updated_info: completedInfo.CompletedExercis
         user.completed_exercise_info = updated_info.dict()
 
         updated_user = utils.row_to_dict(user)
-        updated_user["completed_exercise_info"]["completion_date"] = datetime.now().isoformat()
+        updated_user["completed_exercise_info"]["completion_date"] = datetime.now(pytz.utc).isoformat()
         user_query.update(updated_user, synchronize_session=False)
 
         db.commit()
