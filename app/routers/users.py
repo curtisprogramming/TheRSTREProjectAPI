@@ -7,6 +7,7 @@ from ..models.schemas import UserData
 from ..utilities import oauth2, utils
 from .. import database
 from datetime import datetime
+import pytz
 
 router = APIRouter(
     prefix="/users",
@@ -34,7 +35,7 @@ def create_user(user: UserData.UserCreate, db: Session = Depends(database.get_db
 
     #sets completed_exerccise_info
     user_dict = user.dict()
-    completed_exercise_info_dict = {"completion_date": datetime.now().isoformat(), "completed_exercises": [{"exercise_name":"journaling","completed":False},{"exercise_name":"breathing","completed":False},{"exercise_name":"meditating","completed":False},{"exercise_name":"stretching","completed":False}]}
+    completed_exercise_info_dict = {"completion_date": datetime.now(pytz.utc).isoformat(), "completed_exercises": [{"exercise_name":"journaling","completed":False},{"exercise_name":"breathing","completed":False},{"exercise_name":"meditating","completed":False},{"exercise_name":"stretching","completed":False}]}
     verified_completed_exercise_info = UserData.CompletedExerciseInfo.CompletedExerciseInfoOut(**completed_exercise_info_dict)
     user_dict['completed_exercise_info'] = verified_completed_exercise_info.dict()
     user_dict['completed_exercise_info']['completion_date'] = verified_completed_exercise_info.completion_date.isoformat()
