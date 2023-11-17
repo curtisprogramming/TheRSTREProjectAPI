@@ -541,20 +541,23 @@ def test_user_update_extends_user_base():
 #COMPLETED EXERCISE INFO
 ################################################################################################################################
 def test_completed_exercise_info_base_correct():
-    data = {"completed_exercises": [{"exercise_name": "breathing", "completed": True}], "completion_date": "2023-03-23T17:20:10.576526+00:00"}
+    data = {"completed_exercises": [{"completed": True, "exercise_name": "journaling"},
+                                    {"completed": True, "exercise_name": "breathing"},
+                                    {"completed": False, "exercise_name": "meditating"},
+                                    {"completed": False, "exercise_name": "stretching"}]
+           }
 
-    completed_exercise_info = schemas.UserData.CompletedExerciseInfo(**data)
+    completed_exercise_info = schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase(**data)
     completed_exercise_info_dict = completed_exercise_info.dict()
-    completed_exercise_info_dict['completion_date'] = completed_exercise_info.completion_date.isoformat()
     print(completed_exercise_info_dict)
 
     assert completed_exercise_info_dict == data
 
 def test_completed_exercise_info_base_no_completed_exercises():
-    data = {"completion_date": "2023-03-23T17:20:10.576526+00:00"}
+    data = {}
 
     try:
-         schemas.UserData.CompletedExerciseInfo(**data)
+         schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase(**data)
     except ValidationError as err:
         error_dict = loads(err.json())
         print(error_dict)
@@ -563,24 +566,11 @@ def test_completed_exercise_info_base_no_completed_exercises():
     assert raises(ValidationError)
     assert error_dict == [{'loc': ['completed_exercises'], 'msg': 'field required', 'type': 'value_error.missing'}]
 
-def test_completed_exercise_info_base_no_completion_date():
-    data = {"completed_exercises": [{"exercise_name": "breathing", "completed": True}]}
-
-    try:
-         schemas.UserData.CompletedExerciseInfo(**data)
-    except ValidationError as err:
-        error_dict = loads(err.json())
-        print(error_dict)
-    
-
-    assert raises(ValidationError)
-    assert error_dict == [{'loc': ['completion_date'], 'msg': 'field required', 'type': 'value_error.missing'}]
-
 def test_completed_exercise_base_invalid_completed_exercises():
     data = {"completed_exercises": "This is not a list of complted exercises", "completion_date": "2023-03-23T17:20:10.576526+00:00"}
 
     try:
-        schemas.UserData.CompletedExerciseInfo(**data)
+        schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase(**data)
     except ValidationError as err:
         error_dict = loads(err.json())
         print(error_dict)
@@ -588,20 +578,8 @@ def test_completed_exercise_base_invalid_completed_exercises():
     assert raises(ValidationError)
     assert error_dict == [{'loc': ['completed_exercises'], 'msg': 'value is not a valid list', 'type': 'type_error.list'}]
 
-def test_completed_exercise_base_invalid_completion_date():
-    data = {"completed_exercises": [{"exercise_name": "breathing", "completed": True}], "completion_date": "2023-03-23"}
-
-    try:
-        schemas.UserData.CompletedExerciseInfo(**data)
-    except ValidationError as err:
-        error_dict = loads(err.json())
-        print(error_dict)
-
-    assert raises(ValidationError)
-    assert error_dict == [{'loc': ['completion_date'], 'msg': 'invalid datetime format', 'type': 'value_error.datetime'}]
-
 def test_user_base_extends_BaseModel():
-    assert issubclass(schemas.UserData.CompletedExerciseInfo, BaseModel)
+    assert issubclass(schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase, BaseModel)
 
 
 
@@ -737,23 +715,33 @@ def test_load_all_correct():
     exercises_data = {"id": 100, "name": "Test Name", "description": "Test description", "image_name": "Image name"}
     resources_data = {"id": 100, "name": "Test Name", "url": "https://example.com", "categories": ["Category 1", "Category 2"], "text": True, "online_chat": True, "call": True}
     prompts_data = {"id": 100, "prompt": "This is a prompt"}
-    completed_exercise_info_data = {"completed_exercises": [{"exercise_name": "breathing", "completed": True}], "completion_date": "2023-03-23T17:20:10.576526+00:00"}
+    completed_exercise_info_data = {"completed_exercises": [{"completed": True, "exercise_name": "journaling"},
+                                                            {"completed": True, "exercise_name": "breathing"},
+                                                            {"completed": False, "exercise_name": "meditating"},
+                                                            {"completed": False, "exercise_name": "stretching"}], 
+                                    "completion_date": "2023-03-23T17:20:10.576526+00:00"}
+    journal_entries_data = {"id": "asdjfl9348jk2l", "created_at": "2023-03-23T17:20:10.576526+00:00", "title": "Title", "type": "write", "tags": [], "elements": []}
 
-    data = {"exercises": [exercises_data], "resources": [resources_data], "prompts": [prompts_data], "completed_exercise_info": completed_exercise_info_data}
+    data = {"exercises": [exercises_data], "resources": [resources_data], "prompts": [prompts_data], "completed_exercise_info": completed_exercise_info_data, "journal_entries": [journal_entries_data]}
 
     loadAll = schemas.Extras.LoadAll(**data)
     loadAll_dict = loadAll.dict()
     loadAll_dict['completed_exercise_info']['completion_date'] = loadAll.completed_exercise_info.completion_date.isoformat()
-    print(loadAll_dict)
+    loadAll_dict['journal_entries'][0]['created_at'] = loadAll.journal_entries[0].created_at.isoformat()
 
     assert loadAll_dict == data
 
 def test_load_all_no_exercises():
-    resources_data = {"id": 100, "name": "Test Name", "url": "https://example.com", "categories": ["Category 1", "Category 2"], "text": True, "online_chat": True, "call": True}
-    prompts_data = {"id": 100, "prompt": "This is a prompt"}
-    completed_exercise_info_data = {"completed_exercises": [{"exercise_name": "breathing", "completed": True}], "completion_date": "2023-03-23T17:20:10.576526+00:00"}
+    completed_exercise_info_data = {"completed_exercises": [{"completed": True, "exercise_name": "journaling"},
+                                                            {"completed": True, "exercise_name": "breathing"},
+                                                            {"completed": False, "exercise_name": "meditating"},
+                                                            {"completed": False, "exercise_name": "stretching"}], 
+                                    "completion_date": "2023-03-23T17:20:10.576526+00:00"}
 
-    data = {"resources": [resources_data], "prompts": [prompts_data], "completed_exercise_info": completed_exercise_info_data}
+    data = { "resources": [], 
+            "prompts": [], 
+            "completed_exercise_info": completed_exercise_info_data, 
+            "journal_entries": []}
 
     try:
          schemas.Extras.LoadAll(**data)
@@ -765,11 +753,13 @@ def test_load_all_no_exercises():
     assert error_dict == [{'loc': ['exercises'], 'msg': 'field required', 'type': 'value_error.missing'}]
 
 def test_load_all_no_resources():
-    exercises_data = {"id": 100, "name": "Test Name", "description": "Test description", "image_name": "Image name"}
-    prompts_data = {"id": 100, "prompt": "This is a prompt"}
-    completed_exercise_info_data = {"completed_exercises": [{"exercise_name": "breathing", "completed": True}], "completion_date": "2023-03-23T17:20:10.576526+00:00"}
+    completed_exercise_info_data = {"completed_exercises": [{"completed": True, "exercise_name": "journaling"},
+                                                            {"completed": True, "exercise_name": "breathing"},
+                                                            {"completed": False, "exercise_name": "meditating"},
+                                                            {"completed": False, "exercise_name": "stretching"}], 
+                                    "completion_date": "2023-03-23T17:20:10.576526+00:00"}
 
-    data = {"exercises": [exercises_data], "prompts": [prompts_data], "completed_exercise_info": completed_exercise_info_data}
+    data = {"exercises": [], "prompts": [], "completed_exercise_info": completed_exercise_info_data, "journal_entries": []}
 
     try:
          schemas.Extras.LoadAll(**data)
@@ -781,11 +771,13 @@ def test_load_all_no_resources():
     assert error_dict == [{'loc': ['resources'], 'msg': 'field required', 'type': 'value_error.missing'}]
 
 def test_load_all_no_prompts():
-    exercises_data = {"id": 100, "name": "Test Name", "description": "Test description", "image_name": "Image name"}
-    resources_data = {"id": 100, "name": "Test Name", "url": "https://example.com", "categories": ["Category 1", "Category 2"], "text": True, "online_chat": True, "call": True}
-    completed_exercise_info_data = {"completed_exercises": [{"exercise_name": "breathing", "completed": True}], "completion_date": "2023-03-23T17:20:10.576526+00:00"}
+    completed_exercise_info_data = {"completed_exercises": [{"completed": True, "exercise_name": "journaling"},
+                                                            {"completed": True, "exercise_name": "breathing"},
+                                                            {"completed": False, "exercise_name": "meditating"},
+                                                            {"completed": False, "exercise_name": "stretching"}], 
+                                    "completion_date": "2023-03-23T17:20:10.576526+00:00"}
 
-    data = {"exercises": [exercises_data], "resources": [resources_data], "completed_exercise_info": completed_exercise_info_data}
+    data = {"exercises": [], "resources": [], "completed_exercise_info": completed_exercise_info_data, "journal_entries": []}
 
     try:
          schemas.Extras.LoadAll(**data)
@@ -797,11 +789,8 @@ def test_load_all_no_prompts():
     assert error_dict == [{'loc': ['prompts'], 'msg': 'field required', 'type': 'value_error.missing'}]
     
 def test_load_all_no_completed_exercise_info():
-    exercises_data = {"id": 100, "name": "Test Name", "description": "Test description", "image_name": "Image name"}
-    resources_data = {"id": 100, "name": "Test Name", "url": "https://example.com", "categories": ["Category 1", "Category 2"], "text": True, "online_chat": True, "call": True}
-    prompts_data = {"id": 100, "prompt": "This is a prompt"}
 
-    data = {"exercises": [exercises_data], "resources": [resources_data], "prompts": [prompts_data]}
+    data = {"exercises": [], "resources": [], "prompts": [], "journal_entries": []}
 
     try:
          schemas.Extras.LoadAll(**data)
@@ -811,14 +800,35 @@ def test_load_all_no_completed_exercise_info():
 
     assert raises(ValidationError)
     assert error_dict == [{'loc': ['completed_exercise_info'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_load_all_no_journal_entries():
+
+    completed_exercise_info_data = {"completed_exercises": [{"completed": True, "exercise_name": "journaling"},
+                                                            {"completed": True, "exercise_name": "breathing"},
+                                                            {"completed": False, "exercise_name": "meditating"},
+                                                            {"completed": False, "exercise_name": "stretching"}], 
+                                    "completion_date": "2023-03-23T17:20:10.576526+00:00"}
+
+    data = {"exercises": [], "resources": [], "prompts": [], "completed_exercise_info": completed_exercise_info_data}
+
+    try:
+         schemas.Extras.LoadAll(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['journal_entries'], 'msg': 'field required', 'type': 'value_error.missing'}]
     
 def test_load_all_invalid_exercises():
     exercises_data = "This is not a valid exercise list"
-    resources_data = {"id": 100, "name": "Test Name", "url": "https://example.com", "categories": ["Category 1", "Category 2"], "text": True, "online_chat": True, "call": True}
-    prompts_data = {"id": 100, "prompt": "This is a prompt"}
-    completed_exercise_info_data = {"completed_exercises": [{"exercise_name": "breathing", "completed": True}], "completion_date": "2023-03-23T17:20:10.576526+00:00"}
-
-    data = {"exercises": [exercises_data], "resources": [resources_data], "prompts": [prompts_data], "completed_exercise_info": completed_exercise_info_data}
+    completed_exercise_info_data = {"completed_exercises": [{"completed": True, "exercise_name": "journaling"},
+                                                            {"completed": True, "exercise_name": "breathing"},
+                                                            {"completed": False, "exercise_name": "meditating"},
+                                                            {"completed": False, "exercise_name": "stretching"}], 
+                                    "completion_date": "2023-03-23T17:20:10.576526+00:00"}
+    
+    data = {"exercises": [exercises_data], "resources": [], "prompts": [], "completed_exercise_info": completed_exercise_info_data, "journal_entries": []}
 
     try:
         schemas.Extras.LoadAll(**data)
@@ -830,12 +840,14 @@ def test_load_all_invalid_exercises():
     assert error_dict == [{'loc': ['exercises', 0, 'name'], 'msg': 'field required', 'type': 'value_error.missing'}, {'loc': ['exercises', 0, 'description'], 'msg': 'field required', 'type': 'value_error.missing'}, {'loc': ['exercises', 0, 'image_name'], 'msg': 'field required', 'type': 'value_error.missing'}, {'loc': ['exercises', 0, 'id'], 'msg': 'field required', 'type': 'value_error.missing'}]
 
 def test_load_all_invalid_resources():
-    exercises_data = {"id": 100, "name": "Test Name", "description": "Test description", "image_name": "Image name"}
     resources_data = "This is not a valid resource"
-    prompts_data = {"id": 100, "prompt": "This is a prompt"}
-    completed_exercise_info_data = {"completed_exercises": [{"exercise_name": "breathing", "completed": True}], "completion_date": "2023-03-23T17:20:10.576526+00:00"}
+    completed_exercise_info_data = {"completed_exercises": [{"completed": True, "exercise_name": "journaling"},
+                                                            {"completed": True, "exercise_name": "breathing"},
+                                                            {"completed": False, "exercise_name": "meditating"},
+                                                            {"completed": False, "exercise_name": "stretching"}], 
+                                    "completion_date": "2023-03-23T17:20:10.576526+00:00"}
 
-    data = {"exercises": [exercises_data], "resources": [resources_data], "prompts": [prompts_data], "completed_exercise_info": completed_exercise_info_data}
+    data = {"exercises": [], "resources": [resources_data], "prompts": [], "completed_exercise_info": completed_exercise_info_data, "journal_entries": []}
 
     try:
         schemas.Extras.LoadAll(**data)
@@ -847,12 +859,14 @@ def test_load_all_invalid_resources():
     assert error_dict == [{'loc': ['resources', 0, 'name'], 'msg': 'field required', 'type': 'value_error.missing'}, {'loc': ['resources', 0, 'url'], 'msg': 'field required', 'type': 'value_error.missing'}, {'loc': ['resources', 0, 'categories'], 'msg': 'field required', 'type': 'value_error.missing'}, {'loc': ['resources', 0, 'call'], 'msg': 'field required', 'type': 'value_error.missing'}, {'loc': ['resources', 0, 'text'], 'msg': 'field required', 'type': 'value_error.missing'}, {'loc': ['resources', 0, 'online_chat'], 'msg': 'field required', 'type': 'value_error.missing'}, {'loc': ['resources', 0, 'id'], 'msg': 'field required', 'type': 'value_error.missing'}]
 
 def test_load_all_invalid_prompts():
-    exercises_data = {"id": 100, "name": "Test Name", "description": "Test description", "image_name": "Image name"}
-    resources_data =  {"id": 100, "name": "Test Name", "url": "https://example.com", "categories": ["Category 1", "Category 2"], "text": True, "online_chat": True, "call": True}
     prompts_data = "This is not a valid prompt"
-    completed_exercise_info_data = {"completed_exercises": [{"exercise_name": "breathing", "completed": True}], "completion_date": "2023-03-23T17:20:10.576526+00:00"}
+    completed_exercise_info_data = {"completed_exercises": [{"completed": True, "exercise_name": "journaling"},
+                                                            {"completed": True, "exercise_name": "breathing"},
+                                                            {"completed": False, "exercise_name": "meditating"},
+                                                            {"completed": False, "exercise_name": "stretching"}], 
+                                    "completion_date": "2023-03-23T17:20:10.576526+00:00"}
 
-    data = {"exercises": [exercises_data], "resources": [resources_data], "prompts": [prompts_data], "completed_exercise_info": completed_exercise_info_data}
+    data = {"exercises": [], "resources": [], "prompts": [prompts_data], "completed_exercise_info": completed_exercise_info_data, "journal_entries": []}
 
     try:
         schemas.Extras.LoadAll(**data)
@@ -864,12 +878,9 @@ def test_load_all_invalid_prompts():
     assert error_dict == [{'loc': ['prompts', 0, 'prompt'], 'msg': 'field required', 'type': 'value_error.missing'}, {'loc': ['prompts', 0, 'id'], 'msg': 'field required', 'type': 'value_error.missing'}]
 
 def test_load_all_invalid_completed_exercise_info():
-    exercises_data = {"id": 100, "name": "Test Name", "description": "Test description", "image_name": "Image name"}
-    resources_data =  {"id": 100, "name": "Test Name", "url": "https://example.com", "categories": ["Category 1", "Category 2"], "text": True, "online_chat": True, "call": True}
-    prompts_data = {"id": 100, "prompt": "This is a prompt"}
     completed_exercise_info_data = "This is not valid completed exercise info"
 
-    data = {"exercises": [exercises_data], "resources": [resources_data], "prompts": [prompts_data], "completed_exercise_info": completed_exercise_info_data}
+    data = {"exercises": [], "resources": [], "prompts": [], "completed_exercise_info": completed_exercise_info_data, "journal_entries": []}
 
     try:
         schemas.Extras.LoadAll(**data)
@@ -879,6 +890,26 @@ def test_load_all_invalid_completed_exercise_info():
 
     assert raises(ValidationError)
     assert error_dict == [{'loc': ['completed_exercise_info'], 'msg': 'value is not a valid dict', 'type': 'type_error.dict'}]
+
+def test_load_all_invalid_journal_entry():
+    journal_entry_data = "This is not a valid prompt"
+    completed_exercise_info_data = {"completed_exercises": [{"completed": True, "exercise_name": "journaling"},
+                                                            {"completed": True, "exercise_name": "breathing"},
+                                                            {"completed": False, "exercise_name": "meditating"},
+                                                            {"completed": False, "exercise_name": "stretching"}], 
+                                    "completion_date": "2023-03-23T17:20:10.576526+00:00"}
+
+    data = {"exercises": [], "resources": [], "prompts": [], "completed_exercise_info": completed_exercise_info_data, "journal_entries": [journal_entry_data]}
+
+    try:
+        schemas.Extras.LoadAll(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['journal_entries', 0], 'msg': 'value is not a valid dict', 'type': 'type_error.dict'}]
+
 
 def test_load_all_extends_BaseModel():
     assert issubclass(schemas.Extras.LoadAll, BaseModel)
