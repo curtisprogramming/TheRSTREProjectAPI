@@ -538,7 +538,7 @@ def test_user_update_extends_user_base():
 
 
 
-#COMPLETED EXERCISE INFO
+#COMPLETED EXERCISE INFO BASE
 ################################################################################################################################
 def test_completed_exercise_info_base_correct():
     data = {"completed_exercises": [{"completed": True, "exercise_name": "journaling"},
@@ -566,7 +566,7 @@ def test_completed_exercise_info_base_no_completed_exercises():
     assert raises(ValidationError)
     assert error_dict == [{'loc': ['completed_exercises'], 'msg': 'field required', 'type': 'value_error.missing'}]
 
-def test_completed_exercise_base_invalid_completed_exercises():
+def test_completed_exercise_info_base_invalid_completed_exercises():
     data = {"completed_exercises": "This is not a list of complted exercises", "completion_date": "2023-03-23T17:20:10.576526+00:00"}
 
     try:
@@ -578,8 +578,90 @@ def test_completed_exercise_base_invalid_completed_exercises():
     assert raises(ValidationError)
     assert error_dict == [{'loc': ['completed_exercises'], 'msg': 'value is not a valid list', 'type': 'type_error.list'}]
 
-def test_user_base_extends_BaseModel():
+def test_completed_exercise_info_base_extends_BaseModel():
     assert issubclass(schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase, BaseModel)
+
+
+
+
+
+#COMPLETED EXERCISE INFO OUT
+################################################################################################################################
+def test_completed_exercise_info_out_correct():
+    data = {"completed_exercises": [{"completed": True, "exercise_name": "journaling"},
+                                    {"completed": True, "exercise_name": "breathing"},
+                                    {"completed": False, "exercise_name": "meditating"},
+                                    {"completed": False, "exercise_name": "stretching"}],
+            "completion_date": "2023-03-23T17:20:10.576526+00:00"
+           }
+
+    completed_exercise_info = schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoOut(**data)
+    completed_exercise_info_dict = completed_exercise_info.dict()
+    completed_exercise_info_dict['completion_date'] = completed_exercise_info.completion_date.isoformat()
+
+    assert completed_exercise_info_dict == data
+
+def test_completed_exercise_info_out_no_completed_exercises():
+    data = {"completion_date": "2023-03-23T17:20:10.576526+00:00"}
+
+    try:
+         schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoOut(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+    
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['completed_exercises'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_completed_exercise_info_out_no_completion_date():
+    data = {"completed_exercises": [{"completed": True, "exercise_name": "journaling"},
+                                    {"completed": True, "exercise_name": "breathing"},
+                                    {"completed": False, "exercise_name": "meditating"},
+                                    {"completed": False, "exercise_name": "stretching"}]
+           }
+
+    try:
+         schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoOut(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+    
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['completion_date'], 'msg': 'field required', 'type': 'value_error.missing'}]
+
+def test_completed_exercise_info_out_invalid_completed_exercises():
+    data = {"completed_exercises": "This is not a list of complted exercises", "completion_date": "2023-03-23T17:20:10.576526+00:00"}
+
+    try:
+        schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoOut(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['completed_exercises'], 'msg': 'value is not a valid list', 'type': 'type_error.list'}]
+
+def test_completed_exercise_info_out_invalid_completion_date():
+    data = {"completed_exercises": [{"completed": True, "exercise_name": "journaling"},
+                                    {"completed": True, "exercise_name": "breathing"},
+                                    {"completed": False, "exercise_name": "meditating"},
+                                    {"completed": False, "exercise_name": "stretching"}],
+            "completion_date": "Not a valid date"
+           }
+
+    try:
+        schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoOut(**data)
+    except ValidationError as err:
+        error_dict = loads(err.json())
+        print(error_dict)
+
+    assert raises(ValidationError)
+    assert error_dict == [{'loc': ['completion_date'], 'msg': 'invalid datetime format', 'type': 'value_error.datetime'}]
+
+def test_completed_exercise_info_out_extends_base():
+    assert issubclass(schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoOut, schemas.UserData.CompletedExerciseInfo.CompletedExerciseInfoBase)
 
 
 
