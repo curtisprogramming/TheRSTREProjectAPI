@@ -14,10 +14,18 @@ router = APIRouter(
     tags=["Users"]
 )
 
-#GET USERS - gets all the users 
 @router.get("/", response_model=List[UserData.UserOut])
 def get_users(db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+    """
+    Get all users.
 
+    Parameters:
+        db (Session): The database session.
+        current_user (int): The ID of the current user.
+
+    Returns:
+        List[UserData.UserOut]: List of user data.
+    """
     users = db.query(sa_models.User).all()
 
     if not current_user.admin:
@@ -25,15 +33,23 @@ def get_users(db: Session = Depends(database.get_db), current_user: int = Depend
 
     return users
 
-#CREATE USER - creates a new user
 @router.post("/", response_model=UserData.UserOut, status_code=status.HTTP_201_CREATED)
 def create_user(user: UserData.UserCreate, db: Session = Depends(database.get_db)):
-    
+    """
+    Create a new user.
+
+    Parameters:
+        user (UserData.UserCreate): The user data for creation.
+        db (Session): The database session.
+
+    Returns:
+        UserData.UserOut: The newly created user.
+    """
     #hash the password
     hashed_pwd = utils.hash(user.password)
     user.password = hashed_pwd
 
-    #sets completed_exerccise_info
+    #sets completed_exercise_info
     user_dict = user.dict()
     completed_exercise_info_dict = {"completion_date": datetime.now(pytz.utc).isoformat(), "completed_exercises": [{"exercise_name":"journaling","completed":False},{"exercise_name":"breathing","completed":False},{"exercise_name":"meditating","completed":False},{"exercise_name":"stretching","completed":False}]}
     verified_completed_exercise_info = UserData.CompletedExerciseInfo.CompletedExerciseInfoOut(**completed_exercise_info_dict)
@@ -45,7 +61,6 @@ def create_user(user: UserData.UserCreate, db: Session = Depends(database.get_db
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
-        
         
     except IntegrityError as err:
         err_msg = err.args[0]
@@ -60,11 +75,19 @@ def create_user(user: UserData.UserCreate, db: Session = Depends(database.get_db
 
     return new_user
 
-
-#GET USER - gets a user with a certain id
 @router.get("/{id}", response_model=UserData.UserOut)
 def get_user(id: int, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+    """
+    Get a user by ID.
 
+    Parameters:
+        id (int): The ID of the user to retrieve.
+        db (Session): The database session.
+        current_user (int): The ID of the current user.
+
+    Returns:
+        UserData.UserOut: The user data.
+    """
     user = db.query(sa_models.User).filter(sa_models.User.id == id).first() 
 
     if not user:
@@ -77,11 +100,19 @@ def get_user(id: int, db: Session = Depends(database.get_db), current_user: int 
 
     return user
 
-
-#DELETE USER - deletes a user with certain id
 @router.delete("/{id}")
 def delete_user(id: int, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+    """
+    Delete a user by ID.
 
+    Parameters:
+        id (int): The ID of the user to delete.
+        db (Session): The database session.
+        current_user (int): The ID of the current user.
+
+    Returns:
+        Response: HTTP 204 No Content.
+    """
     user_query = db.query(sa_models.User).filter(sa_models.User.id == id)
     user = user_query.first()
 
@@ -96,11 +127,20 @@ def delete_user(id: int, db: Session = Depends(database.get_db), current_user: i
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-
-#UPDATE USER - updates the user
 @router.put("/{id}", response_model=UserData.UserOut)
 def update_user(id: int, updated_user: UserData.UserUpdate, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+    """
+    Update a user by ID.
 
+    Parameters:
+        id (int): The ID of the user to update.
+        updated_user (UserData.UserUpdate): The updated user data.
+        db (Session): The database session.
+        current_user (int): The ID of the current user.
+
+    Returns:
+        UserData.UserOut: The updated user data.
+    """
     user_query = db.query(sa_models.User).filter(sa_models.User.id == id)
     user = user_query.first()
 

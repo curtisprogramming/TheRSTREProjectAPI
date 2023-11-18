@@ -1,61 +1,90 @@
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
+from typing import Optional
+from fastapi import Depends, status, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.orm import Session
 from ..models import sa_models
 from ..models.schemas import Token
 from .. import database
-from fastapi import Depends, status, HTTPException
-from fastapi.security import OAuth2PasswordBearer
 from ..config import settings
-from sqlalchemy.orm import Session
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='login')
 
 SECRET_KEY = settings.secret_key
 ALGORITHM = settings.algorithm
-ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes  
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
-def create_access_token(data: dict):
+def create_access_token(data: dict) -> str:
+    """
+    Create an access token.
 
-    #validates data
+    Parameters:
+        data (dict): The data to encode in the token.
+
+    Returns:
+        str: The encoded JWT token.
+    """
     Token.TokenData(**data)
 
     to_encode = data.copy()
 
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
-    
+
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
     return encoded_jwt
 
-def verify_access_token(token: str, credentials_exception):
+def verify_access_token(token: str, credentials_exception: HTTPException) -> Token.TokenData:
+    """
+    Verify the access token.
 
+    Parameters:
+        token (str): The JWT token to verify.
+        credentials_exception (HTTPException): Exception to raise in case of verification failure.
+
+    Returns:
+        Token.TokenData: Decoded token data.
+    """
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
-        id = payload.get("user_id")
+        user_id = payload.get("user_id")
         admin = payload.get("admin")
 
-        if id is None or admin is None:
+        if user_id is None or admin is None:
             raise credentials_exception
 
-        token_data = Token.TokenData(user_id=id, admin=admin)
+        token_data = Token.TokenData(user_id=user_id, admin=admin)
 
     except JWTError:
         raise credentials_exception
 
     return token_data
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(database.get_db)):
-    
-    credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
-    detail=f"Could not validate credentials", headers={"WWW-Authenticate": "Bearer"})
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(database.get_db)) -> sa_models.User:
+    """
+    Get the current user based on the access token.
 
-    token = verify_access_token(token, credentials_exception)
+    Parameters:
+        token (str): The JWT token.
+        db (Session): The database session.
 
-    user = db.query(sa_models.User).filter(sa_models.User.id == token.user_id).first()
+    Returns:
+        sa_models.User: The current user.
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
-    if user == None:
+    token_data = verify_access_token(token, credentials_exception)
+
+    user = db.query(sa_models.User).filter(sa_models.User.id == token_data.user_id).first()
+
+    if user is None:
         raise credentials_exception
 
     return user

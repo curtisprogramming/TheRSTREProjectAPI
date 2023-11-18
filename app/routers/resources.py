@@ -13,15 +13,37 @@ router = APIRouter(
 
 @router.get("/", response_model=List[Resource.ResourceOut])
 def get_resources(db: Session = Depends(database.get_db)):
-   
+    """
+    Get a list of resources.
+
+    Parameters:
+      db (Session): Database session.
+
+    Returns:
+      List[Resource.ResourceOut]: List of resources.
+    """
     query = db.query(sa_models.Resource)
     resources = query.all()
 
     return resources
 
 @router.post("/", response_model=List[Resource.ResourceOut], status_code=status.HTTP_201_CREATED)
-def create_resource(resources: List[Resource.ResourceBase], db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+def create_resource(
+    resources: List[Resource.ResourceBase],
+    db: Session = Depends(database.get_db),
+    current_user: int = Depends(oauth2.get_current_user)
+):
+    """
+    Create new resources.
 
+    Parameters:
+      resources (List[Resource.ResourceBase]): List of resources to create.
+      db (Session): Database session.
+      current_user (int): Current user ID.
+
+    Returns:
+      List[Resource.ResourceOut]: List of created resources.
+    """
     if not current_user.admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"User with id: {current_user.id} is not an admin")
 
@@ -38,7 +60,16 @@ def create_resource(resources: List[Resource.ResourceBase], db: Session = Depend
 
 @router.get("/{id}", response_model=Resource.ResourceOut)
 def get_resource(id: int, db: Session = Depends(database.get_db)):
+    """
+    Get a resource by ID.
 
+    Parameters:
+      id (int): Resource ID.
+      db (Session): Database session.
+
+    Returns:
+      Resource.ResourceOut: The requested resource.
+    """
     resource = db.query(sa_models.Resource).filter(sa_models.Resource.id == id).first()
 
     if not resource:
@@ -47,8 +78,24 @@ def get_resource(id: int, db: Session = Depends(database.get_db)):
     return resource
 
 @router.put("/{id}", response_model=Resource.ResourceOut)
-def update_resource(id: int, updated_resource: Resource.ResourceBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+def update_resource(
+    id: int,
+    updated_resource: Resource.ResourceBase,
+    db: Session = Depends(database.get_db),
+    current_user: int = Depends(oauth2.get_current_user)
+):
+    """
+    Update a resource by ID.
 
+    Parameters:
+      id (int): Resource ID.
+      updated_resource (Resource.ResourceBase): Updated resource data.
+      db (Session): Database session.
+      current_user (int): Current user ID.
+
+    Returns:
+      Resource.ResourceOut: The updated resource.
+    """
     resource_query = db.query(sa_models.Resource).filter(sa_models.Resource.id == id)
     resource = resource_query.first()
 
@@ -64,7 +111,22 @@ def update_resource(id: int, updated_resource: Resource.ResourceBase, db: Sessio
     return resource
 
 @router.delete("/{id}")
-def delete_resources(id: int, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+def delete_resources(
+    id: int,
+    db: Session = Depends(database.get_db),
+    current_user: int = Depends(oauth2.get_current_user)
+):
+    """
+    Delete a resource by ID.
+
+    Parameters:
+      id (int): Resource ID.
+      db (Session): Database session.
+      current_user (int): Current user ID.
+
+    Returns:
+      Response: HTTP response indicating success.
+    """
     resource_query = db.query(sa_models.Resource).filter(sa_models.Resource.id == id)
     resource = resource_query.first()
 
@@ -78,12 +140,3 @@ def delete_resources(id: int, db: Session = Depends(database.get_db), current_us
     db.commit()
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-    
-
-
-    
-
-
-
-

@@ -12,11 +12,29 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=extra_schemas.LoadAll)
-def load_all(db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+def load_all(
+    db: Session = Depends(database.get_db),
+    current_user: int = Depends(oauth2.get_current_user)
+):
+    """
+    Load all data including exercises, resources, prompts, completed exercise info, and journal entries.
 
+    Parameters:
+      db (Session): Database session.
+      current_user (int): Current user ID.
+
+    Returns:
+      extra_schemas.LoadAll: Object containing all loaded data.
+    """
     exercises = db.query(sa_models.Exercise).all()
     resources = db.query(sa_models.Resource).all()
     prompts = db.query(sa_models.Prompt).all()
     user = db.query(sa_models.User).filter(sa_models.User.id == current_user.id).first()
 
-    return extra_schemas.LoadAll(exercises=exercises, resources=resources, prompts=prompts, completed_exercise_info=user.completed_exercise_info, journal_entries=user.journal_entries)
+    return extra_schemas.LoadAll(
+        exercises=exercises,
+        resources=resources,
+        prompts=prompts,
+        completed_exercise_info=user.completed_exercise_info,
+        journal_entries=user.journal_entries
+    )

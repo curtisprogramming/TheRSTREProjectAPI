@@ -11,21 +11,47 @@ import pytz
 
 router = APIRouter(
     prefix="/journalentries",
-    tags=["Journal Entires"]
+    tags=["Journal Entries"]
 )
 
 journalEntries = UserData.JournalEntry
 
 @router.get("/", response_model=List[journalEntries.JournalEntryOut])
-def get_journal_entries(db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+def get_journal_entries(
+    db: Session = Depends(database.get_db),
+    current_user: int = Depends(oauth2.get_current_user)
+):
+    """
+    Get a list of all journal entries for the current user.
 
+    Parameters:
+      db (Session): Database session.
+      current_user (int): Current user ID.
+
+    Returns:
+      List[journalEntries.JournalEntryOut]: List of journal entries.
+    """
     journal_entries_col = db.query(sa_models.User.journal_entries).filter(sa_models.User.id == current_user.id).first()
 
     return journal_entries_col.journal_entries
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=journalEntries.JournalEntryOut)
-def create_journal_entry(new_journal_entry: journalEntries.JournalEntryBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+def create_journal_entry(
+    new_journal_entry: journalEntries.JournalEntryBase,
+    db: Session = Depends(database.get_db),
+    current_user: int = Depends(oauth2.get_current_user)
+):
+    """
+    Create a new journal entry for the current user.
 
+    Parameters:
+      new_journal_entry (journalEntries.JournalEntryBase): Details of the new journal entry.
+      db (Session): Database session.
+      current_user (int): Current user ID.
+
+    Returns:
+      journalEntries.JournalEntryOut: Details of the created journal entry.
+    """
     user_query = db.query(sa_models.User).filter(sa_models.User.id == current_user.id)
     user = user_query.first()
     
@@ -46,8 +72,22 @@ def create_journal_entry(new_journal_entry: journalEntries.JournalEntryBase, db:
     return journal_entry_dict
 
 @router.get("/{id}", response_model=journalEntries.JournalEntryOut)
-def get_journal_entry(id: str, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+def get_journal_entry(
+    id: str,
+    db: Session = Depends(database.get_db),
+    current_user: int = Depends(oauth2.get_current_user)
+):
+    """
+    Get details of a specific journal entry.
 
+    Parameters:
+      id (str): Journal entry ID.
+      db (Session): Database session.
+      current_user (int): Current user ID.
+
+    Returns:
+      journalEntries.JournalEntryOut: Details of the specified journal entry.
+    """
     user = db.query(sa_models.User).filter(sa_models.User.id == current_user.id).first()
     
     journal_entries = user.journal_entries
@@ -59,8 +99,24 @@ def get_journal_entry(id: str, db: Session = Depends(database.get_db), current_u
     return journal_entries[journal_entries_index]
 
 @router.put("/{id}", response_model=journalEntries.JournalEntryOut)
-def update_journal_entry(id: str, updated_entry: journalEntries.JournalEntryBase, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+def update_journal_entry(
+    id: str,
+    updated_entry: journalEntries.JournalEntryBase,
+    db: Session = Depends(database.get_db),
+    current_user: int = Depends(oauth2.get_current_user)
+):
+    """
+    Update details of a specific journal entry.
 
+    Parameters:
+      id (str): Journal entry ID.
+      updated_entry (journalEntries.JournalEntryBase): Updated details of the journal entry.
+      db (Session): Database session.
+      current_user (int): Current user ID.
+
+    Returns:
+      journalEntries.JournalEntryOut: Updated details of the journal entry.
+    """
     user_query = db.query(sa_models.User).filter(sa_models.User.id == current_user.id)
     user = user_query.first()
 
@@ -88,8 +144,22 @@ def update_journal_entry(id: str, updated_entry: journalEntries.JournalEntryBase
     return journal_entries[journal_entries_index]
 
 @router.delete("/{id}")
-def delete_journal_entry(id: str, db: Session = Depends(database.get_db), current_user: int = Depends(oauth2.get_current_user)):
+def delete_journal_entry(
+    id: str,
+    db: Session = Depends(database.get_db),
+    current_user: int = Depends(oauth2.get_current_user)
+):
+    """
+    Delete a specific journal entry.
 
+    Parameters:
+      id (str): Journal entry ID.
+      db (Session): Database session.
+      current_user (int): Current user ID.
+
+    Returns:
+      Response: HTTP Response indicating success.
+    """
     user_query = db.query(sa_models.User).filter(sa_models.User.id == current_user.id)
     user = user_query.first()
 
@@ -106,4 +176,4 @@ def delete_journal_entry(id: str, db: Session = Depends(database.get_db), curren
     user_query.update(utils.row_to_dict(user), synchronize_session=False)
     db.commit()
 
-    return Response(status_code=status.HTTP_204_NO_CONTENT) 
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

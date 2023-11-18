@@ -12,6 +12,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 #adds routes to app
 app.include_router(users.router)
 app.include_router(resources.router)
@@ -24,4 +25,10 @@ app.include_router(loadAll.router)
 
 @app.get("/")
 def root():
+    """
+    Root endpoint of the API.
+
+    Returns:
+        str: Welcome message.
+    """
     return "Welcome to The RSTRE Project API!!"
